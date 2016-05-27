@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 public class Planet : MonoBehaviour {
 
+
+	public float persDistance = 5.2f;
+
 	List<User> users = new List<User>();
 	public string Name {get;private set;}
 	public delegate void ValueChangedFunc(int value);
@@ -33,8 +36,8 @@ public class Planet : MonoBehaviour {
 		var u = RemoveUser(user.id);
 		users.Add(user);
 		if (u != null){
-			var pos = u.transform.position;
-			user.SetPos(pos.x, pos.y);
+			var pos = u.transform.localPosition;
+			user.SetPos(pos);
 		}
 		InvokeUsersCountChanged();
 	}
@@ -54,8 +57,12 @@ public class Planet : MonoBehaviour {
 			OnUsersCountChanged(users.Count);
 	}
 	
-	float GetUserPosX(){
-		return (float)(users.Count)*1.7f;
+	Vector3 GetUserPos(){
+		var stepAngle = 360f/55f;
+		var angle = (float)users.Count * stepAngle;
+		var x = persDistance * Mathf.Sin(angle);
+		var z = persDistance * Mathf.Cos(angle);
+		return new Vector3(x,0,z);
 	}
 	
 	public void SetName(string value){
@@ -67,9 +74,9 @@ public class Planet : MonoBehaviour {
 		int len = param.Length;
 		for (int k = 0 ; k < len ; /*пусто*/) {
             User user = NewUser();
-			User.createUser(user, true, param, k, true, false, false);
+			UsersFactory.createUser(user, true, param, k, true, false, false);
 			// ставим
-			user.SetPos(GetUserPosX(), 0);
+			user.SetPos(GetUserPos());
 			AddUser(user);
 			int head = param[k+3].ToInt();
             if (head < 0) {
@@ -83,9 +90,9 @@ public class Planet : MonoBehaviour {
 	
 	public void JoinUser(string[] param){
 		User user = NewUser();
-		User.createUser(user, true, param, 0, true, true, true);
+		UsersFactory.createUser(user, true, param, 0, true, true, true);
 		// ставим
-		user.SetPos(GetUserPosX(), 0);
+		user.SetPos(GetUserPos());
 		AddUser(user);
 	}
 	

@@ -13,12 +13,11 @@ public class Main : MonoBehaviour {
 	public InputField inputMessage;
 	public ScrollRect chatScrollRect;
 	public CameraHelper cameraHelper;
-	
+	public Planet planet;
 	
 	int userId;
 	string userName, userPass, authCode;
 	TcpSocket socket;
-	Planet planet;
 	TouchListener touch;
 	
 		
@@ -26,7 +25,7 @@ public class Main : MonoBehaviour {
 		
 		touch = GetComponent<TouchListener>();
 		
-		planet = GetComponent<Planet>();
+		//planet = GetComponent<Planet>();
 		planet.OnUsersCountChanged += OnUsersCountChanged;
 		
 		socket = new TcpSocket();
@@ -69,22 +68,35 @@ public class Main : MonoBehaviour {
 	void Update(){
 		UpdateNetwork();
 		UpdateInput();
+		CheckEscape();
+	}
+	
+	void CheckEscape(){
+		if (Input.GetKeyDown(KeyCode.Escape)){
+			Application.Quit();
+		}
 	}
 	
 	void UpdateNetwork(){
 		socket.Update();
 	}
 	
+	Vector2 prevPos;
 	void UpdateInput(){
 		
 		var pressed = touch.IsPressed;
 		
-		// двигаем камеру в стороны
+		// крутим планету
 		if (touch.ScreenPos.y < Screen.height*0.25f){
 			if (pressed){
-				cameraHelper.StartMove(touch.ScreenPos);
+				//cameraHelper.StartMove(touch.ScreenPos);
+				prevPos = touch.ScreenPos;
 			} else if (touch.IsDowned){
-				cameraHelper.Move(touch.ScreenPos);
+				var delta = touch.ScreenPos-prevPos;
+				var angle = -delta.x*0.4f;
+				planet.transform.Rotate(Vector3.up, angle);
+				prevPos = touch.ScreenPos;
+				//cameraHelper.Move(touch.ScreenPos);
 			}
 		}
 		
@@ -257,7 +269,12 @@ public class Main : MonoBehaviour {
 				MessageBox.Show("Error "+c.Name, c.Postfix);
 				Disconnect();
 				break;
-				
+			
+			case "473":
+				MessageBox.Show("Fly","Can't fly to closed planet!");
+				//Disconnect();
+				break;
+					
 			case "900": // инфа о планете
 				planet.SetName(c.Parameters[0]);
 				break;
