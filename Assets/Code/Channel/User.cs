@@ -7,6 +7,8 @@ public class User : MonoBehaviour {
 	public TextMesh textName;
 	public int id;
 	
+	public Place place;
+	
 	List<View> views = new List<View>();
 	List<ImageObject> images = new List<ImageObject>();
 	string clan;

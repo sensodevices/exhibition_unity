@@ -4,17 +4,62 @@ using System.Collections;
 using System.Collections.Generic;
 
 
+/* Место стояния юзера */
+
+public class Place {
+	public Vector3 pos;
+	public User user;
+}
+
+
+/* Планета с персами */
+
 public class Planet : MonoBehaviour {
 
-
 	public float persDistance = 5.2f;
-
+	public float persDistanceInner = 2.5f;
+	public int persCount = 55;
+	public int persCountInner = 15;
+	
 	List<User> users = new List<User>();
 	public string Name {get;private set;}
 	public delegate void ValueChangedFunc(int value);
 	public ValueChangedFunc OnUsersCountChanged;
 	
+	List<Place> places = new List<Place>();
+	
 	void Start(){
+		InitPlaces();
+	}
+	
+	void InitPlaces(){
+		InitPlacesInternal(persCount, persDistance);
+		InitPlacesInternal(persCountInner, persDistanceInner);
+	}
+	
+	void InitPlacesInternal(int cnt, float dist){
+		var stepAngle = 360f/(float)cnt;
+		for (int k = 0; k < cnt; ++k){
+			var angle = (float)k * stepAngle;
+			var x = dist * Mathf.Sin(angle*Mathf.Deg2Rad);
+			var z = dist * Mathf.Cos(angle*Mathf.Deg2Rad);
+			var p = new Vector3(x,0,z);
+			var place = new Place();
+			place.pos = p;
+			places.Add(place);
+		}
+	}
+	
+	Place GetEmptyPlace(){
+		foreach (var item in places){
+			if (item.user == null)
+			return item;
+		}
+		return null;
+	}
+	
+	public void Scroll(float dx, float dy){
+		transform.Rotate(Vector3.up, -10f*dx);
 	}
 	
 	User NewUser(){
@@ -45,6 +90,8 @@ public class Planet : MonoBehaviour {
 	User RemoveUser(int userId){
 		var u = GetUserByID(userId);
 		if (u != null){
+			var p = u.place;
+			p.user = null; // "освободили" место
 			users.Remove(u);
 			Destroy(u.gameObject);
 		}
@@ -57,16 +104,15 @@ public class Planet : MonoBehaviour {
 			OnUsersCountChanged(users.Count);
 	}
 	
-	Vector3 GetUserPos(){
-		var stepAngle = 360f/55f;
-		var angle = (float)users.Count * stepAngle;
-		var x = persDistance * Mathf.Sin(angle);
-		var z = persDistance * Mathf.Cos(angle);
-		return new Vector3(x,0,z);
-	}
-	
 	public void SetName(string value){
 		Name = value;
+	}
+	
+	void SetUserOnEmptyPlace(User u){
+		var p = GetEmptyPlace();
+		u.SetPos(p.pos);
+		u.place = p;
+		p.user = u;
 	}
 	
 	public void JoinUsers(string line){
@@ -76,7 +122,7 @@ public class Planet : MonoBehaviour {
             User user = NewUser();
 			UsersFactory.createUser(user, true, param, k, true, false, false);
 			// ставим
-			user.SetPos(GetUserPos());
+			SetUserOnEmptyPlace(user);
 			AddUser(user);
 			int head = param[k+3].ToInt();
             if (head < 0) {
@@ -92,7 +138,7 @@ public class Planet : MonoBehaviour {
 		User user = NewUser();
 		UsersFactory.createUser(user, true, param, 0, true, true, true);
 		// ставим
-		user.SetPos(GetUserPos());
+		SetUserOnEmptyPlace(user);
 		AddUser(user);
 	}
 	

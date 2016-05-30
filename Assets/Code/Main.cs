@@ -9,11 +9,12 @@ public class Main : MonoBehaviour {
 	public int Port = 6667;
 	public Text textEntering, textPlanetName, textUsersCount;
 	public Button buttonConnect;
-	public Transform chatArea, chatTitle;
 	public InputField inputMessage;
 	public ScrollRect chatScrollRect;
 	public CameraHelper cameraHelper;
 	public Planet planet;
+	public Finger finger;
+	public Chat chat;
 	
 	int userId;
 	string userName, userPass, authCode;
@@ -31,7 +32,18 @@ public class Main : MonoBehaviour {
 		socket = new TcpSocket();
 		socket.OnMessageReceived += OnMessageReceived;
 		
+		finger.OnSwipeChat += OnSwipeChat;
+		finger.OnSwipePlanet += OnSwipePlanet;
+		
 		Connect();
+	}
+	
+	void OnSwipeChat(float dx, float dy){
+		chat.Scroll(dx, dy);
+	}
+	
+	void OnSwipePlanet(float dx, float dy){
+		planet.Scroll(dx, dy);
 	}
 	
 	void OnUsersCountChanged(int value){
@@ -50,7 +62,7 @@ public class Main : MonoBehaviour {
 		socket.Connect(Host, Port);
 		textEntering.gameObject.SetActive(true);
 		buttonConnect.gameObject.SetActive(false);
-		chatTitle.gameObject.SetActive(false);
+		//chatTitle.gameObject.SetActive(false);
 		return null;
 	} 
 	
@@ -58,7 +70,7 @@ public class Main : MonoBehaviour {
 		cmdQuit();
 		textEntering.gameObject.SetActive(false);
 		buttonConnect.gameObject.SetActive(true);
-		chatTitle.gameObject.SetActive(false);
+		//chatTitle.gameObject.SetActive(false);
 	}
 	
 	void OnDisable(){
@@ -88,7 +100,7 @@ public class Main : MonoBehaviour {
 		
 		// крутим планету
 		if (touch.ScreenPos.y < Screen.height*0.25f){
-			if (pressed){
+			/*if (pressed){
 				//cameraHelper.StartMove(touch.ScreenPos);
 				prevPos = touch.ScreenPos;
 			} else if (touch.IsDowned){
@@ -97,7 +109,7 @@ public class Main : MonoBehaviour {
 				planet.transform.Rotate(Vector3.up, angle);
 				prevPos = touch.ScreenPos;
 				//cameraHelper.Move(touch.ScreenPos);
-			}
+			}*/
 		}
 		
 		// проверим попадение в юзера
@@ -131,51 +143,20 @@ public class Main : MonoBehaviour {
 		var s = inputMessage.text.Trim();
 		if (s != ""){
 			cmdPrivmsg(s);
-			var v = chatScrollRect.verticalNormalizedPosition;
-			var scrollToEnd = (v < 0.01f);
-			AddMessage(userId, s);
+			chat.AddMessage(userName, s);
 			inputMessage.text = "";
-			if (scrollToEnd){
-				Invoke("ScrollChatToEnd", 0.1f);
-			}
 		}
-	}
-	
-	// если скроллим сразу после добавления элемента, то ничего не происходит
-	// нужно подождать немного
-	void ScrollChatToEnd(){
-		StartCoroutine(ScrollChatToEndInternal());
-	}
-	IEnumerator ScrollChatToEndInternal(){
-		var v = chatScrollRect.verticalNormalizedPosition;
-		var step = v/10f;
-		while (chatScrollRect.verticalNormalizedPosition > 0){
-			yield return new WaitForSeconds(0.03f);
-			chatScrollRect.verticalNormalizedPosition -= step; 
-		}
-		chatScrollRect.verticalNormalizedPosition = 0;
-		yield break;
 	}
 	
 	void AddMessage(int userId, string msg){
-		var go = Instantiate(Prefabs.Current.MsgItem) as GameObject;
-		go.transform.SetParent(chatArea);
-		go.transform.localScale = Vector3.one;
-		go.transform.localRotation = Quaternion.identity;
-		go.transform.localPosition = Vector3.zero;
-		var txt = go.transform.Find("Text").GetComponent<Text>();
-		txt.text = msg;
-		txt = go.transform.Find("Nick").GetComponent<Text>();
-		bool set = false;
+		string nick = null;
 		if (userId > 0){
 			var u = planet.GetUserByID(userId);
 			if (u != null){
-				txt.text = u.name;
-				set = true;
+				nick = u.name;
 			}
 		}
-		if (!set)
-			txt.gameObject.SetActive(false);
+		chat.AddMessage(nick, msg);
 	}
 	
 	void SendToServer(string message){
@@ -186,7 +167,7 @@ public class Main : MonoBehaviour {
 	void OnEnterChannel(){
 		textEntering.gameObject.SetActive(false);
 		textPlanetName.text = planet.Name;
-		chatTitle.gameObject.SetActive(true);
+		//chatTitle.gameObject.SetActive(true);
 		PlayerPrefs.SetString("planetName", planet.Name);
 	}
 	
@@ -270,6 +251,11 @@ public class Main : MonoBehaviour {
 				Disconnect();
 				break;
 			
+			case "471": // планета переполнена
+				MessageBox.Show("Error "+c.Name, c.Postfix);
+				//Disconnect();
+				break;
+				
 			case "473":
 				MessageBox.Show("Fly","Can't fly to closed planet!");
 				//Disconnect();
