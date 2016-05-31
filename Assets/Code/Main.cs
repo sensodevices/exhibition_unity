@@ -5,6 +5,7 @@ using System.Collections;
 
 public class Main : MonoBehaviour {
 
+	public string recoveryCode;
 	public string Host = "galaxy.mobstudio.ru";
 	public int Port = 6667;
 	public Text textEntering, textPlanetName, textUsersCount;
@@ -199,7 +200,7 @@ public class Main : MonoBehaviour {
 				var code = c.Parameters[0];
 				authCode = SessionCodeGenerator.Generate(code);
 				cmdIdent();
-				cmdRecover("3vq218kz41");
+				cmdRecover(recoveryCode);
 				break;
 				
 			case "REGISTER": // добро на вход
