@@ -39,12 +39,22 @@ public class Planet : MonoBehaviour {
 	
 	void InitPlacesInternal(int cnt, float dist){
 		var stepAngle = 360f/(float)cnt;
+		cnt = cnt/2 + cnt%2;
 		for (int k = 0; k < cnt; ++k){
-			var angle = (float)k * stepAngle;
+			var angle = (float)k * stepAngle + 180f;
 			var x = dist * Mathf.Sin(angle*Mathf.Deg2Rad);
 			var z = dist * Mathf.Cos(angle*Mathf.Deg2Rad);
 			var p = new Vector3(x,0,z);
 			var place = new Place();
+			place.pos = p;
+			places.Add(place);
+			if (k == 0)
+				continue;
+			angle = -(float)k * stepAngle + 180f;
+			x = dist * Mathf.Sin(angle*Mathf.Deg2Rad);
+			z = dist * Mathf.Cos(angle*Mathf.Deg2Rad);
+			p = new Vector3(x,0,z);
+			place = new Place();
 			place.pos = p;
 			places.Add(place);
 		}
@@ -62,6 +72,45 @@ public class Planet : MonoBehaviour {
 		transform.Rotate(Vector3.up, -10f*dx);
 	}
 	
+	float autoScrollAngle;
+	bool isAutoscroll;
+	public void ResetAutoScrollToUser(){
+		isAutoscroll = false;
+	}
+	public void AutoScrollToUser(){
+		var orient = new Vector3(0,0,-12);
+		// находим ближайшее к камере занятое место
+		Place near = null;
+		float min = float.MaxValue;
+		foreach (var item in places){
+			if (item.user == null)
+				continue;
+			var d = Vector3.Distance(orient, item.user.transform.position);
+			if (d < min){
+				min = d;
+				near = item;
+			}
+		}
+		var p = near.user.transform.position;
+		float a = Vector3.Angle(orient, p);
+		if (p.x < orient.x)
+			a = -a;
+		autoScrollAngle = a;
+		isAutoscroll = true;
+		StartCoroutine(AutoScrollInternal());
+	}
+	
+	IEnumerator AutoScrollInternal(){
+		var step = autoScrollAngle/10f;
+		for (int k = 0; k < 10; ++k){
+			if (!isAutoscroll)
+				yield break;
+			transform.Rotate(Vector3.up, step);
+			yield return new WaitForSeconds(0.02f);
+		}
+		yield break;
+	}
+		
 	User NewUser(){
 		var go = Prefabs.NewInstantce(Prefabs.Current.UserObj);
 		go.transform.SetParent(transform);
@@ -102,6 +151,13 @@ public class Planet : MonoBehaviour {
 	void InvokeUsersCountChanged(){
 		if (OnUsersCountChanged != null)
 			OnUsersCountChanged(users.Count);
+	}
+	
+	public void Clear(){
+		foreach (var u in users){
+			Destroy(u);
+		}
+		users.Clear();
 	}
 	
 	public void SetName(string value){

@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
 
+
+public enum ColType{
+	Planet, Chat, User
+}
+
+
 public class Finger : MonoBehaviour {
 
 	public bool IsPlanetCollision {get;private set;}
@@ -7,6 +13,8 @@ public class Finger : MonoBehaviour {
 	
 	public delegate void MoveFunc(float dx, float dy);
 	public MoveFunc OnSwipeChat, OnSwipePlanet;
+	public delegate void CollisionFunc(ColType type);
+	public CollisionFunc OnExitCollision, OnEnterCollision;
 	
 	bool isPressed;
 	float posZ;
@@ -63,18 +71,34 @@ public class Finger : MonoBehaviour {
 	
 	void OnTriggerEnter(Collider other) {
         var t = other.tag;
-		if (t == "PlanetCollider")
+		ColType type;
+		if (t == "PlanetCollider"){
 			IsPlanetCollision = true;
-		else if (t == "ChatCollider")
+			type = ColType.Planet;
+		} else if (t == "ChatCollider"){
 			IsChatCollision = true;
+			type = ColType.Chat;
+		} else {
+			type = ColType.User;
+		}
+		if (OnEnterCollision != null)
+			OnEnterCollision(type);
     }
 	
 	void OnTriggerExit(Collider other) {
         var t = other.tag;
-		if (t == "PlanetCollider")
+		ColType type;
+		if (t == "PlanetCollider"){
 			IsPlanetCollision = false;
-		else if (t == "ChatCollider")
+			type = ColType.Planet;
+		} else if (t == "ChatCollider"){
 			IsChatCollision = false;
+			type = ColType.Chat;
+		} else {
+			type = ColType.User;
+		}
+		if (OnExitCollision != null)
+			OnExitCollision(type);
     }
 
 }

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class MessageBox : MonoBehaviour {
 
 	public Text textTitle, textContent;
+	public GameObject showHideMe;
 	
 	private static MessageBox Current;
 	
@@ -13,9 +14,15 @@ public class MessageBox : MonoBehaviour {
 	}
 	
 	public static void Show (string title, string content) {
-		Current.textTitle.text = title;
-		Current.textContent.text = content;
-		Current.gameObject.SetActive(true);
+		Current.ShowLocal(title, content);
+	}
+	
+	public void ShowLocal (string title, string content) {
+		textTitle.text = title;
+		textContent.text = content;
+		gameObject.SetActive(true);
+		if (showHideMe != null)
+			showHideMe.SetActive(false);
 	}
 	
 	public static void Dismiss () {
@@ -24,5 +31,7 @@ public class MessageBox : MonoBehaviour {
 	
 	public void DismissLocal () {
 		gameObject.SetActive(false);
+		if (showHideMe != null)
+			showHideMe.SetActive(true);
 	}
 }

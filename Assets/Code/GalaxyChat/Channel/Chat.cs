@@ -1,18 +1,34 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Chat : MonoBehaviour {
 
 	public Transform chatArea, chatTitle;
 	public ScrollRect scrollRect;
+	public int historySize = 30;
+	
+	List<GameObject> items = new List<GameObject>();
 	
 	public void AddMessage(string nick, string message){
+		
+		GameObject go;
+		
+		if (items.Count == historySize){// первое сообщение ставим в конец
+			go = items[0];
+			go.transform.SetParent(null);
+			items.RemoveAt(0);
+			//Destroy(i);
+			print("reuse chat item");
+		} else { // если не достигли истории, то создаём
+			go = Instantiate(Prefabs.Current.MsgItem) as GameObject;
+		}
 		
 		var v = scrollRect.verticalNormalizedPosition;
 		var scrollToEnd = (v < 0.01f);
 		
-		var go = Instantiate(Prefabs.Current.MsgItem) as GameObject;
+		items.Add(go);
 		go.transform.SetParent(chatArea);
 		go.transform.localScale = Vector3.one;
 		go.transform.localRotation = Quaternion.identity;

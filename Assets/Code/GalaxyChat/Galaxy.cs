@@ -5,6 +5,7 @@ using System.Collections;
 
 public class Galaxy : MonoBehaviour {
 
+	public string customPlanetName = "";
 	public string recoveryCode;
 	public string Host = "galaxy.mobstudio.ru";
 	public int Port = 6667;
@@ -21,7 +22,7 @@ public class Galaxy : MonoBehaviour {
 	string userName, userPass, authCode;
 	TcpSocket socket;
 	TouchListener touch;
-	
+	bool isWait353 = true;
 		
 	void Start () {
 		
@@ -35,8 +36,24 @@ public class Galaxy : MonoBehaviour {
 		
 		finger.OnSwipeChat += OnSwipeChat;
 		finger.OnSwipePlanet += OnSwipePlanet;
+		finger.OnExitCollision += OnExitCollision;
+		finger.OnEnterCollision += OnEnterCollision;
 		
 		Connect();
+	}
+	
+	void OnEnterCollision(ColType type){
+		if (type == ColType.Planet){
+			planet.ResetAutoScrollToUser();
+		}
+		
+	}
+	
+	void OnExitCollision(ColType type){
+		if (type == ColType.Planet){
+			planet.AutoScrollToUser();
+		}
+		
 	}
 	
 	void OnSwipeChat(float dx, float dy){
@@ -97,6 +114,11 @@ public class Galaxy : MonoBehaviour {
 	Vector2 prevPos;
 	void UpdateInput(){
 		
+		if (Input.GetKeyDown(KeyCode.T)){
+			// заполняем чат тестовыми сообщениями
+			StartFillChat();
+		}
+		
 		var pressed = touch.IsPressed;
 		
 		// крутим планету
@@ -126,6 +148,18 @@ public class Galaxy : MonoBehaviour {
 				}
 			}
 		}
+	}
+	
+	void StartFillChat(){
+		StartCoroutine(StartFillChatInternal());
+	} 
+	
+	IEnumerator StartFillChatInternal(){
+		for (int k = 0; k < 200; ++k){
+			AddMessage(userId, "testing chat message "+Random.Range(0,100));
+			yield return new WaitForSeconds(0.3f);
+		}
+		yield break;
 	}
 	
 	public void SelectPlanet(){
@@ -213,7 +247,9 @@ public class Galaxy : MonoBehaviour {
 			case "999": // auth OK
 				cmdAddons();
 				//PlayerPrefs.GetString("planetName", null);
-				string s = null;//"pi100let"
+				string s = null;//"pi100let";
+				if (customPlanetName != "")
+					s = customPlanetName;
 				cmdJoin(s);
 				break;
 			
@@ -222,11 +258,16 @@ public class Galaxy : MonoBehaviour {
 				break;
 			
 			case "353": // список юзеров. может быть несколько таких команд
+				if (isWait353){
+					planet.Clear();
+					isWait353 = false;
+				}
 				planet.JoinUsers(c.Postfix);
 				planet.SetName(c.Parameters[2]);
 				break;
 			
 			case "366":
+				isWait353 = true;
 				OnEnterChannel();
 				break;
 				

@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 55d3b158a57b0fb4fa78057a90fa80ef
+timeCreated: 1464687332
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 3
+  fontSize: 20
+  forceTextureCase: -1
+  characterSpacing: 1
+  characterPadding: 0
+  includeFontData: 1
+  fontNames:
+  - Blogger Sans UTF
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 1c088ac3861b149478d410e4a34759c5, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
