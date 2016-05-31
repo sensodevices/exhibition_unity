@@ -9,6 +9,7 @@ using System.Collections.Generic;
 public class Place {
 	public Vector3 pos;
 	public User user;
+	public bool full;
 }
 
 
@@ -16,10 +17,15 @@ public class Place {
 
 public class Planet : MonoBehaviour {
 
+	public MeshRenderer mesh;
+	public float rotateSpeed = 15.5f;
+	
 	public float persDistance = 5.2f;
-	public float persDistanceInner = 2.5f;
 	public int persCount = 55;
-	public int persCountInner = 15;
+	public int myUserId;
+	
+	//public float persDistanceInner = 2.5f;
+	//public int persCountInner = 15;
 	
 	List<User> users = new List<User>();
 	public string Name {get;private set;}
@@ -27,14 +33,17 @@ public class Planet : MonoBehaviour {
 	public ValueChangedFunc OnUsersCountChanged;
 	
 	List<Place> places = new List<Place>();
+	Color defColor;
+	
 	
 	void Start(){
 		InitPlaces();
+		defColor = mesh.material.color;
 	}
 	
 	void InitPlaces(){
 		InitPlacesInternal(persCount, persDistance);
-		InitPlacesInternal(persCountInner, persDistanceInner);
+		//InitPlacesInternal(persCountInner, persDistanceInner);
 	}
 	
 	void InitPlacesInternal(int cnt, float dist){
@@ -62,22 +71,26 @@ public class Planet : MonoBehaviour {
 	
 	Place GetEmptyPlace(){
 		foreach (var item in places){
-			if (item.user == null)
-			return item;
+			if (!item.full){
+				item.full = true;
+				return item;
+			}
 		}
 		return null;
 	}
 	
 	public void Scroll(float dx, float dy){
-		transform.Rotate(Vector3.up, -10f*dx);
+		transform.Rotate(Vector3.up, -rotateSpeed*dx);
 	}
 	
 	float autoScrollAngle;
 	bool isAutoscroll;
-	public void ResetAutoScrollToUser(){
+	public void EnterCollider(){
 		isAutoscroll = false;
+		mesh.material.color = Color.gray;
 	}
-	public void AutoScrollToUser(){
+	public void ExitCollider(){
+		mesh.material.color = defColor;
 		var orient = new Vector3(0,0,-12);
 		// находим ближайшее к камере занятое место
 		Place near = null;
@@ -129,10 +142,10 @@ public class Planet : MonoBehaviour {
 	void AddUser(User user){
 		var u = RemoveUser(user.id);
 		users.Add(user);
-		if (u != null){
+		/*if (u != null){
 			var pos = u.transform.localPosition;
 			user.SetPos(pos);
-		}
+		}*/
 		InvokeUsersCountChanged();
 	}
 	
@@ -141,6 +154,7 @@ public class Planet : MonoBehaviour {
 		if (u != null){
 			var p = u.place;
 			p.user = null; // "освободили" место
+			p.full = false;
 			users.Remove(u);
 			Destroy(u.gameObject);
 		}
@@ -155,7 +169,10 @@ public class Planet : MonoBehaviour {
 	
 	public void Clear(){
 		foreach (var u in users){
-			Destroy(u);
+			var p = u.place;
+			p.user = null; // "освободили" место
+			p.full = false;
+			Destroy(u.gameObject);
 		}
 		users.Clear();
 	}
@@ -175,17 +192,22 @@ public class Planet : MonoBehaviour {
 		var param = line.SplitBySpace();
 		int len = param.Length;
 		for (int k = 0 ; k < len ; /*пусто*/) {
-            User user = NewUser();
-			UsersFactory.createUser(user, true, param, k, true, false, false);
-			// ставим
-			SetUserOnEmptyPlace(user);
-			AddUser(user);
-			int head = param[k+3].ToInt();
-            if (head < 0) {
-                int val = Math.Abs(head);
-                k += 5+5*val;
-            } else {
-                k += 6;
+            try {
+				User user = NewUser();
+				UsersFactory.createUser(user, true, param, k, true, false, false);
+				// ставим
+				SetUserOnEmptyPlace(user);
+				AddUser(user);
+				int head = param[k+3].ToInt();
+				if (head < 0) {
+					int val = Math.Abs(head);
+					k += 5+5*val;
+				} else {
+					k += 6;
+				}
+			} catch (Exception e){
+				print("param[3]: "+param[k+3]);
+				throw new Exception("PARSE ERROR");
 			}
         }
 	}
@@ -193,6 +215,8 @@ public class Planet : MonoBehaviour {
 	public void JoinUser(string[] param){
 		User user = NewUser();
 		UsersFactory.createUser(user, true, param, 0, true, true, true);
+		if (user.id == myUserId) // своего заново не добавляем
+			return;
 		// ставим
 		SetUserOnEmptyPlace(user);
 		AddUser(user);

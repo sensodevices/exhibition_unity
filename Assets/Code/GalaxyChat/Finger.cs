@@ -8,6 +8,8 @@ public enum ColType{
 
 public class Finger : MonoBehaviour {
 
+	public float speed = 1;
+
 	public bool IsPlanetCollision {get;private set;}
 	public bool IsChatCollision {get;private set;}
 	
@@ -42,7 +44,7 @@ public class Finger : MonoBehaviour {
 			isPressed = pressed;
 		}
 		
-		dz = pressed ? 0.5f : 0;
+		dz = pressed ? 0.15f : 0;
 		
 		if (xl)
 			dx = -1;
@@ -52,7 +54,7 @@ public class Finger : MonoBehaviour {
 			dy = 1;
 		else if (yd)
 			dy = -1;
-		var k = Time.deltaTime * 5f;  
+		var k = Time.deltaTime * speed;  
 		dx *= k;
 		dy *= k;
 		var p = transform.localPosition;

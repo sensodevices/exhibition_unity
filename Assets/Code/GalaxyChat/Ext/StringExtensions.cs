@@ -42,6 +42,8 @@ public static class StringExtensions
 	/// <returns>Возвращает элементы строки, которые в оригинале были отделены пробелом.</returns>
 	public static string[] SplitBySpace(this string sourceString)
 	{
+		sourceString = sourceString.Replace("   "," ");
+		sourceString = sourceString.Replace("  "," ");
 		return sourceString.Split(SpaceSymbolPattern, StringSplitOptions.RemoveEmptyEntries);
 	}
 

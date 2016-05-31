@@ -8,8 +8,15 @@ public class Chat : MonoBehaviour {
 	public Transform chatArea, chatTitle;
 	public ScrollRect scrollRect;
 	public int historySize = 30;
+	public float moveSpeed = 2.5f;
 	
 	List<GameObject> items = new List<GameObject>();
+	
+	
+	
+	void Start(){
+		
+	}
 	
 	public void AddMessage(string nick, string message){
 		
@@ -54,7 +61,7 @@ public class Chat : MonoBehaviour {
 	
 	IEnumerator ScrollChatToEndInternal(){
 		var v = scrollRect.verticalNormalizedPosition;
-		var step = v/10f;
+		var step = v/5f;
 		while (scrollRect.verticalNormalizedPosition > 0){
 			yield return new WaitForSeconds(0.03f);
 			scrollRect.verticalNormalizedPosition -= step; 
@@ -64,7 +71,8 @@ public class Chat : MonoBehaviour {
 	}
 	
 	public void Scroll(float dx, float dy){
-		scrollRect.verticalScrollbar.value -= 0.5f*dy;
+		scrollRect.verticalScrollbar.value -= moveSpeed*dy;
 	}
+	
 	
 }

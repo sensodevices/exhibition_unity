@@ -17,6 +17,7 @@ public class Galaxy : MonoBehaviour {
 	public Planet planet;
 	public Finger finger;
 	public Chat chat;
+	public Chat3d chat3d;
 	
 	int userId;
 	string userName, userPass, authCode;
@@ -44,14 +45,18 @@ public class Galaxy : MonoBehaviour {
 	
 	void OnEnterCollision(ColType type){
 		if (type == ColType.Planet){
-			planet.ResetAutoScrollToUser();
+			planet.EnterCollider();
+		} else if (type == ColType.Chat){
+			chat3d.EnterCollider();
 		}
 		
 	}
 	
 	void OnExitCollision(ColType type){
 		if (type == ColType.Planet){
-			planet.AutoScrollToUser();
+			planet.ExitCollider();
+		} else if (type == ColType.Chat){
+			chat3d.ExitCollider();
 		}
 		
 	}
@@ -116,7 +121,7 @@ public class Galaxy : MonoBehaviour {
 		
 		if (Input.GetKeyDown(KeyCode.T)){
 			// заполняем чат тестовыми сообщениями
-			StartFillChat();
+			//StartFillChat();
 		}
 		
 		var pressed = touch.IsPressed;
@@ -242,6 +247,7 @@ public class Galaxy : MonoBehaviour {
 				userPass = c.Parameters[1].Trim();
 				userName = c.Parameters[2].Trim();
 				cmdUser();
+				planet.myUserId = userId;
 				break;
 				
 			case "999": // auth OK
