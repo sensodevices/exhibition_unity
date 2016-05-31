@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Text.RegularExpressions;
 using System.Collections;
 
-public class Main : MonoBehaviour {
+public class Galaxy : MonoBehaviour {
 
 	public string recoveryCode;
 	public string Host = "galaxy.mobstudio.ru";
