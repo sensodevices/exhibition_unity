@@ -45,16 +45,20 @@ public class Galaxy : MonoBehaviour {
 	
 	void OnEnterCollision(ColType type){
 		if (type == ColType.Planet){
-			planet.EnterCollider();
+			planet.EnterScrollCollider();
+		} else if (type == ColType.Pers){
+			planet.EnterPersCollider();
 		} else if (type == ColType.Chat){
-			chat3d.EnterCollider();
+			chat3d.EnterCollider(); 
 		}
 		
 	}
 	
 	void OnExitCollision(ColType type){
 		if (type == ColType.Planet){
-			planet.ExitCollider();
+			planet.ExitScrollCollider();
+		} else if (type == ColType.Pers){
+			planet.ExitPersCollider();
 		} else if (type == ColType.Chat){
 			chat3d.ExitCollider();
 		}
@@ -295,12 +299,12 @@ public class Galaxy : MonoBehaviour {
 			case "433":
 			case "601":
 			case "403":
-				MessageBox.Show("Error "+c.Name, c.Postfix);
+				MessageBox.Show("System Notice", c.Postfix);
 				Disconnect();
 				break;
 			
 			case "471": // планета переполнена
-				MessageBox.Show("Error "+c.Name, c.Postfix);
+				MessageBox.Show("System Notice", c.Postfix);
 				//Disconnect();
 				break;
 				
@@ -329,9 +333,34 @@ public class Galaxy : MonoBehaviour {
 				ParseKick(c);
 				break;
 				
+			case "852":
+				if (isWait852){
+					Reset852();
+					isWait852 = false;
+				}
+				Parse852(c);
+				break;
+			
+			case "853":
+				isWait852 = true;
+				Prepare852();
+				break;
+				
 			default:
 				break;
 		}
+	}
+	
+	bool isWait852;
+	//852 2402 :Set cannon up
+	void Parse852(GalaCommand command){
+		MenuActions.AddItem(command.Postfix, command.Parameters[0]);
+	}
+	void Reset852(){
+		MenuActions.Clear();
+	}
+	void Prepare852(){
+		MenuActions.Prepare();
 	}
 	
 	// ACTION 8530196 8807955 :БАОБАБ gives autofocused a massage

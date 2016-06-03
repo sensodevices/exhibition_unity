@@ -19,7 +19,7 @@ public class Planet : MonoBehaviour {
 
 	public MeshRenderer mesh;
 	public float rotateSpeed = 15.5f;
-	
+	public float minimalScrollDelta;
 	public float persDistance = 5.2f;
 	public int persCount = 55;
 	public int myUserId;
@@ -34,7 +34,7 @@ public class Planet : MonoBehaviour {
 	
 	List<Place> places = new List<Place>();
 	Color defColor;
-	
+	Place selPlace;
 	
 	void Start(){
 		InitPlaces();
@@ -69,6 +69,12 @@ public class Planet : MonoBehaviour {
 		}
 	}
 	
+	User GetSelected(){
+		if (selPlace == null)
+			selPlace = places[0];
+		return selPlace.user;
+	}
+	
 	Place GetEmptyPlace(){
 		foreach (var item in places){
 			if (!item.full){
@@ -80,16 +86,38 @@ public class Planet : MonoBehaviour {
 	}
 	
 	public void Scroll(float dx, float dy){
+		scrollDelta += dx;
+		if (!hasMinScroll())
+			return;
 		transform.Rotate(Vector3.up, -rotateSpeed*dx);
+	}
+	
+	bool hasMinScroll(){
+		return Mathf.Abs(scrollDelta) >= minimalScrollDelta;
 	}
 	
 	float autoScrollAngle;
 	bool isAutoscroll;
-	public void EnterCollider(){
+	float scrollDelta;
+	public void EnterPersCollider(){
+		
+	}
+	public void ExitPersCollider(){
+		if (hasMinScroll()) // при прокрутке не вызываем меню на персе
+			return;
+		var u = GetSelected();
+		if (u == null) // чел улетел с переднего места
+			return;
+		MenuActions.Show(u.id, u.name);
+	}
+	
+	public void EnterScrollCollider(){
 		isAutoscroll = false;
 		mesh.material.color = Color.gray;
+		scrollDelta = 0;
 	}
-	public void ExitCollider(){
+	public void ExitScrollCollider(){
+		print("scrollDelta: "+scrollDelta);
 		mesh.material.color = defColor;
 		var orient = new Vector3(0,0,-12);
 		// находим ближайшее к камере занятое место
@@ -111,6 +139,7 @@ public class Planet : MonoBehaviour {
 		autoScrollAngle = a;
 		isAutoscroll = true;
 		StartCoroutine(AutoScrollInternal());
+		selPlace = near;
 	}
 	
 	IEnumerator AutoScrollInternal(){
@@ -125,7 +154,7 @@ public class Planet : MonoBehaviour {
 	}
 		
 	User NewUser(){
-		var go = Prefabs.NewInstantce(Prefabs.Current.UserObj);
+		var go = Prefabs.NewInstantce(Prefabs.Me.UserObj);
 		go.transform.SetParent(transform);
 		var u = go.GetComponent<User>();
 		return u;

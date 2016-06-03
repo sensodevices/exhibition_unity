@@ -2,15 +2,15 @@
 
 public class Prefabs : MonoBehaviour {
 	
-	//public GameObject UserNameText;
+	public GameObject MenuItem;
 	public GameObject MsgItem;
 	public GameObject UserObj;
 
 
-	public static Prefabs Current {get;private set;}
+	public static Prefabs Me {get;private set;}
 	
 	void Awake () {
-		Current = this;
+		Me = this;
 	}
 	
 	public static GameObject NewInstantce(GameObject prefab){

@@ -9,7 +9,8 @@ TrueTypeFontImporter:
   characterSpacing: 1
   characterPadding: 0
   includeFontData: 1
-  fontNames: []
+  fontNames:
+  - BloggerSans
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

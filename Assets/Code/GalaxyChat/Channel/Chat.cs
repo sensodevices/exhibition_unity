@@ -29,7 +29,7 @@ public class Chat : MonoBehaviour {
 			//Destroy(i);
 			print("reuse chat item");
 		} else { // если не достигли истории, то создаём
-			go = Instantiate(Prefabs.Current.MsgItem) as GameObject;
+			go = Instantiate(Prefabs.Me.MsgItem) as GameObject;
 		}
 		
 		var v = scrollRect.verticalNormalizedPosition;

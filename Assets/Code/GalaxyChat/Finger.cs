@@ -2,7 +2,7 @@
 
 
 public enum ColType{
-	Planet, Chat, User
+	Planet, Chat, Pers, Undefined
 }
 
 
@@ -26,6 +26,11 @@ public class Finger : MonoBehaviour {
 	}
 	
 	void Update () {
+		
+		if (Input.GetMouseButtonDown(0)){
+			print("mouse: "+Input.mousePosition);
+		}
+		
 		var xl = Input.GetKey(KeyCode.LeftArrow);
 		var xr = Input.GetKey(KeyCode.RightArrow);
 		var yu = Input.GetKey(KeyCode.UpArrow);
@@ -36,6 +41,23 @@ public class Finger : MonoBehaviour {
 		if (pressed != isPressed){
 			if (pressed){
 				posZ = transform.localPosition.z;
+				
+				var pos = Camera.main.WorldToScreenPoint(transform.position);
+				pos.z = -10000;
+				print("finger at: "+pos);
+				/*var ray = Camera.main.ScreenPointToRay(pos);
+				RaycastHit hit;
+				var res = Physics.RaycastAll(ray);
+				if (res.Length > 0){
+					foreach (var h in res){
+						print("hit: "+h.collider.name);
+					}
+				}*/
+				var hit2d = Physics2D.Raycast(pos, Vector2.zero);
+				if (hit2d.collider != null){
+					print("hit2d: "+hit2d.collider.name);
+				}
+		
 			} else {
 				var pp = transform.localPosition;
 				pp.z = posZ;
@@ -45,6 +67,7 @@ public class Finger : MonoBehaviour {
 		}
 		
 		dz = pressed ? 0.15f : 0;
+		//dz=0;
 		
 		if (xl)
 			dx = -1;
@@ -80,8 +103,10 @@ public class Finger : MonoBehaviour {
 		} else if (t == "ChatCollider"){
 			IsChatCollision = true;
 			type = ColType.Chat;
+		} else if (t == "PersCollider"){
+			type = ColType.Pers;
 		} else {
-			type = ColType.User;
+			type = ColType.Undefined;
 		}
 		if (OnEnterCollision != null)
 			OnEnterCollision(type);
@@ -96,8 +121,10 @@ public class Finger : MonoBehaviour {
 		} else if (t == "ChatCollider"){
 			IsChatCollision = false;
 			type = ColType.Chat;
+		} else if (t == "PersCollider"){
+			type = ColType.Pers;
 		} else {
-			type = ColType.User;
+			type = ColType.Undefined;
 		}
 		if (OnExitCollision != null)
 			OnExitCollision(type);
