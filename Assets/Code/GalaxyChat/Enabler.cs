@@ -9,7 +9,8 @@ public class Enabler : MonoBehaviour {
 	
 		if (Array != null) {
 			foreach (var i in Array) {
-				i.SetActive(active);
+				if (i != null)
+					i.SetActive(active);
 			}
 		}
 
