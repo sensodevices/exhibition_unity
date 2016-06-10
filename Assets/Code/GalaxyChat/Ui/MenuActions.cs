@@ -10,7 +10,7 @@ public class MenuItem {
 
 public class MenuActions : MonoBehaviour {
 
-	private static MenuActions Current;
+	public static MenuActions Me {get; private set;}
 	
 	public Text textTitle;
 	public Transform itemsArea;
@@ -22,7 +22,7 @@ public class MenuActions : MonoBehaviour {
 	int associatedUserId;
 	
 	void Awake(){
-		Current = this;
+		Me = this;
 		DismissLocal();// прячем
 	}
 	
@@ -31,11 +31,11 @@ public class MenuActions : MonoBehaviour {
 			Text = text, 
 			Action = action
 		};
-		Current.items.Add(i);
+		Me.items.Add(i);
 	}
 	
 	public static void Show (int associatedUserId, string userName) {
-		Current.ShowLocal(associatedUserId, userName);
+		Me.ShowLocal(associatedUserId, userName);
 	}
 	
 	public void ShowLocal (int associatedUserId, string userName) {
@@ -46,7 +46,7 @@ public class MenuActions : MonoBehaviour {
 	}
 	
 	public static void Dismiss () {
-		Current.DismissLocal();
+		Me.DismissLocal();
 	}
 	
 	public void DismissLocal () {
@@ -54,7 +54,7 @@ public class MenuActions : MonoBehaviour {
 	}
 	
 	public static void Clear () {
-		var list = Current.items;
+		var list = Me.items;
 		foreach (var item in list){
 			Destroy(item.obj);
 		}
@@ -62,11 +62,11 @@ public class MenuActions : MonoBehaviour {
 	}
 	
 	public static void Prepare () {
-		var list = Current.items;
+		var list = Me.items;
 		var prefab = Prefabs.Me.MenuItem;
 		foreach (var item in list){
 			var go = Instantiate(prefab) as GameObject;
-			go.transform.SetParent(Current.itemsArea);
+			go.transform.SetParent(Me.itemsArea);
 			go.transform.localScale = Vector3.one;
 			go.transform.localRotation = Quaternion.identity;
 			go.transform.localPosition = Vector3.zero;

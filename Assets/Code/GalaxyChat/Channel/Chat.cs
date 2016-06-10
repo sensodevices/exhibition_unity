@@ -56,7 +56,8 @@ public class Chat : MonoBehaviour {
 	}
 		
 	void ScrollChatToEnd(){
-		StartCoroutine(ScrollChatToEndInternal());
+		if (gameObject.activeInHierarchy)
+			StartCoroutine(ScrollChatToEndInternal());
 	}
 	
 	IEnumerator ScrollChatToEndInternal(){

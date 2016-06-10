@@ -15,6 +15,7 @@ public class ChatSettings : MonoBehaviour {
 	void Awake () {
 		Me = this;
 		LoadPrefs();
+		gameObject.SetActive(false);
 	}
 	
 	public void Save(){

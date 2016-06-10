@@ -212,6 +212,10 @@ public class Planet : MonoBehaviour {
 	
 	void SetUserOnEmptyPlace(User u){
 		var p = GetEmptyPlace();
+		if (p == null){// этому юзеру не хватило места на планете
+			u.gameObject.SetActive(false);
+			return;
+		}
 		u.SetPos(p.pos);
 		u.place = p;
 		p.user = u;

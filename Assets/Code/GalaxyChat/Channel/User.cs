@@ -75,7 +75,8 @@ public class User : MonoBehaviour {
 		if (io != null)
 			return;
 		images.Add(image);
-		StartCoroutine( image.LoadImage(OnImageLoaded) );
+		if (gameObject.activeInHierarchy)
+			StartCoroutine( image.LoadImage(OnImageLoaded) );
 	}
 	
 	ImageObject GetImageByUrl(string url){
