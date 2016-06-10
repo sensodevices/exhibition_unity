@@ -22,7 +22,8 @@ public class NetworkManager : MonoBehaviour
   }
   public int sensorsCnt = 7;
   public Canvas GameSettingsMenu; // prefab
-    
+  public Transform VRCamera;
+
   private UdpClient udpClient = null;
   private UdpState udpState = null;
   private IPEndPoint vibrateEP; // EndPoint to send vibrate packets to
@@ -45,7 +46,21 @@ public class NetworkManager : MonoBehaviour
 		startUdpListener();
   }
 
-  
+  void FixedUpdate ()
+  {
+    if (vibrateEP != null && udpState.is_sending == false) {
+      var rotationArray = new float[] { VRCamera.rotation.w, VRCamera.rotation.x, VRCamera.rotation.y, VRCamera.rotation.z };
+      byte[] msg = new byte[19];
+      msg[0] = 0x45;
+      msg[1] = 0x67;
+      msg[2] = 0x02;
+      Buffer.BlockCopy(rotationArray, 0, msg, 3, rotationArray.Length * 4);
+
+      udpState.is_sending = true;
+      udpClient.BeginSend(msg, 3, vibrateEP, m_SendCb, udpState);
+    }
+  }
+
   void OnDestroy() 
   {
     stopUdpListener();
@@ -138,10 +153,11 @@ public class NetworkManager : MonoBehaviour
   public void VibrateFinger(HandNetworkData.DataType handType, byte fingerId, byte duration)
   {
     if (vibrateEP != null && udpState.is_sending == false) {
-      byte[] msg = new byte[3];
+      byte[] msg = new byte[4];
       msg[0] = 0x45;
       msg[1] = 0x67;
-      msg[2] = (byte)((fingerId << 5) | (duration & 0x1F));
+      msg[2] = 0x01;
+      msg[3] = (byte)((fingerId << 5) | (duration & 0x1F));
       
       udpState.is_sending = true;
       udpClient.BeginSend(msg, 3, vibrateEP, m_SendCb, udpState);
