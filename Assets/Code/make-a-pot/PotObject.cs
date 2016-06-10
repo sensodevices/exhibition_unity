@@ -292,19 +292,16 @@ public class PotObject : MonoBehaviour {
     {
         float _angle, _u, _v;
         uint vertexInd = offset;
-        Debug.Log("-------------------");
         for (uint i = 0; i <= verticesPerCircle; ++i) // create circle vertices
         {
             _angle = i * angleBetweenVertices;
             _u = Mathf.Cos(_angle) * 0.1f + 0.1f;
             _v = Mathf.Sin(_angle) * 0.1f + 0.1f;
             if (!isTop) _v += 0.2f;
-            Debug.Log(_u + " : " + _v);
             
             uv[vertexInd] = new Vector2(_u, _v);
             ++vertexInd;
         }
-        Debug.Log("-------------------");
     }
     
     /**

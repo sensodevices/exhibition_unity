@@ -31,7 +31,6 @@ public class HandNetworkData {
 		y = BitConverter.ToSingle(data, start) * Mathf.Rad2Deg; start += 4;
 		z = BitConverter.ToSingle(data, start) * Mathf.Rad2Deg; start += 4; 
 		rightHand.palmRotation = new Vector3(x, y, z);
-		Debug.Log("Palm rotation: " + rightHand.palmRotation);
 		
 		x = BitConverter.ToSingle(data, start); start += 4;
 		z = BitConverter.ToSingle(data, start); start += 4;

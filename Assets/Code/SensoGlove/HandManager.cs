@@ -49,7 +49,6 @@ public class HandManager : MonoBehaviour {
 			}
 
 			Vector3 palmPosition = aData.palmPosition;
-			Debug.Log(aData.palmPosition);
 			if (needReset) {
 				palmPositionCorrection = startHandPosition - palmPosition * netDataFactor;
 			}

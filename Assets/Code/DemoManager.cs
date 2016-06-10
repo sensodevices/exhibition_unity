@@ -3,6 +3,8 @@ using System.Collections;
 
 public class DemoManager : MonoBehaviour {
 
+	public Transform VRCamera;
+
 	public GameObject SensoHandsPrefab;
 	public Vector3 SensoHandsPosition;
 	public Vector3 SensoHandsRotation;
@@ -23,7 +25,11 @@ public class DemoManager : MonoBehaviour {
 	void Start () {
 		if (SensoHandsPrefab != null)
 		{
-			Instantiate(SensoHandsPrefab, SensoHandsPosition, Quaternion.Euler(SensoHandsRotation));
+			GameObject sensoMan = (GameObject)Instantiate(SensoHandsPrefab, SensoHandsPosition, Quaternion.Euler(SensoHandsRotation));
+			if (sensoMan != null && VRCamera != null) {
+				var netMan = sensoMan.GetComponent<NetworkManager>();
+				netMan.VRCamera = VRCamera;
+			}
 		}
 
 		if (ShapesPrefab != null)
