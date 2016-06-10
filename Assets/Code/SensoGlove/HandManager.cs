@@ -32,17 +32,17 @@ public class HandManager : MonoBehaviour {
 		startHandPosition = new Vector3 (this.transform.localPosition.x, this.transform.localPosition.y, this.transform.localPosition.z);
 		// moveToPosition = new Vector3 (this.transform.localPosition.x, this.transform.localPosition.y, this.transform.localPosition.z);
 
-		for (int i = 0; i < 5; ++i) {
+		for (int i = 0; i < fingerRoots.Length; ++i) {
 			fingerLengths [i] = Vector3.Distance (fingerRoots [i].transform.localPosition, fingerTargets[i].transform.localPosition);
 		}
 	}
 	
 	// Update is called once per frame
 	void Update () 
-  {
-    // Hand position
-    HandNetworkData.SingleHandData aData = netMan.GetHandData(handType);
-        
+	{
+		// Hand position
+		HandNetworkData.SingleHandData aData = netMan.GetHandData(handType);
+			
 		if (aData != null) {
 			if (Input.GetKeyDown("space")) {
 				needReset = true;
@@ -77,7 +77,7 @@ public class HandManager : MonoBehaviour {
 			// targetContainer.transform.localEulerAngles = new Vector3(-wristRotation.x, wristRotation.y, 0.0f);
 			
 			//Fingers
-			for (var i = 0; i < 5; ++i) {
+			for (var i = 0; i < fingerTargets.Length; ++i) {
 				Vector3 fingerPosition = calcFingerPosition ((uint)i, aData.fingerPositions[i]);
 				if (fingerPosition != fingerTargets[i].transform.localPosition) {
 					fingerTargets[i].transform.localPosition = Vector3.Lerp(fingerTargets[i].transform.localPosition, fingerPosition, Time.deltaTime * 10);
@@ -90,7 +90,7 @@ public class HandManager : MonoBehaviour {
 
 
 	Vector3 calcFingerPosition (uint fingerId, Vector3 netData) {
-		if (fingerId > fingerRoots.Length)
+		if (fingerId >= fingerRoots.Length)
 			return new Vector3 (0.0f, 0.0f, 0.0f);
 		return netData * fingerLengths [fingerId] + fingerRoots[fingerId].transform.localPosition;
 	}
