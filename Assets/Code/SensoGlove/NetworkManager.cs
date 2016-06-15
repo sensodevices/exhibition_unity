@@ -36,6 +36,7 @@ public class NetworkManager : MonoBehaviour
   private AsyncCallback m_ConnectCallback, m_SendCb, m_ReadCb;
 
   private DateTime lastVRCameraSent = DateTime.Now;
+  private DateTime lastSensoData = DateTime.Now;
   
 	void Start ()
   {
@@ -109,6 +110,10 @@ public class NetworkManager : MonoBehaviour
       }
       var now = DateTime.Now;
       var dt = now - lastVRCameraSent;
+      var dataDT = now - lastSensoData;
+      if (dataDT.TotalMilliseconds > 1000) {
+        do_read(tcpState);
+      }
       if (!tcpState.is_sending && dt.TotalMilliseconds >= 100) {
         var rotationArray = new float[] { VRCamera.rotation.w, VRCamera.rotation.x, VRCamera.rotation.y, VRCamera.rotation.z };
         byte[] msg = new byte[19];
@@ -140,7 +145,6 @@ public class NetworkManager : MonoBehaviour
     var aState = (TcpState)ar.AsyncState;
     aState.waitConnect = false;
     var tcpClient = (TcpClient)aState.sock;
-    Debug.Log("connected: " + tcpClient.Connected);
     if (tcpClient.Connected) {
       tcpState.stream = tcpClient.GetStream();
       tcpState.ready = true;
@@ -185,6 +189,7 @@ public class NetworkManager : MonoBehaviour
         Debug.Log("Error parsing: " + je.Message);
       }
       if (parsedPacket != null) {
+        lastSensoData = DateTime.Now;
         var leftHand = parsedPacket["lh"];
         if (leftHand != null )
           handData.DeserializeHand(HandNetworkData.DataType.LeftHand, leftHand.AsObject);
@@ -252,7 +257,6 @@ public class NetworkManager : MonoBehaviour
   private void HandleDisconnect(int reason)
   {
     if (tcpState.ready) {
-      Debug.Log("Disconnect " + reason);
       Stop();
     }
   }
