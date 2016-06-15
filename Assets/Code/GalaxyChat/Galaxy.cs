@@ -5,10 +5,6 @@ using System.Collections;
 
 public class Galaxy : MonoBehaviour {
 
-	public string customPlanetName = "";
-	public string recoveryCode;
-	public string Host = "galaxy.mobstudio.ru";
-	public int Port = 6667;
 	public Text textEntering, textPlanetName, textUsersCount;
 	public Button buttonConnect;
 	public InputField inputMessage;
@@ -86,7 +82,7 @@ public class Galaxy : MonoBehaviour {
 	} 
 	
 	IEnumerator ConnectInternal(){
-		socket.Connect(Host, Port);
+		socket.Connect(ChatSettings.Me.Host, ChatSettings.Me.Port);
 		textEntering.gameObject.SetActive(true);
 		buttonConnect.gameObject.SetActive(false);
 		//chatTitle.gameObject.SetActive(false);
@@ -205,7 +201,7 @@ public class Galaxy : MonoBehaviour {
 	
 	void SendToServer(string message){
 		socket.Write(message);
-		Debug.Log(">> " + message);
+		Log(">> " + message);
 	}
 	
 	void OnEnterChannel(){
@@ -229,8 +225,8 @@ public class Galaxy : MonoBehaviour {
 		message = message.Trim();
 		if (message == "")
 			return;
-		//Debug.Log("<< '" + message + "'");
-		Debug.Log("<< " + message);
+		//log("<< '" + message + "'");
+		Log("<< " + message);
 		GalaCommand c = new GalaCommand(message.Trim());
 		/*print("prefix: "+c.Prefix);
 		print("name: "+c.Name);
@@ -243,7 +239,7 @@ public class Galaxy : MonoBehaviour {
 				var code = c.Parameters[0];
 				authCode = SessionCodeGenerator.Generate(code);
 				cmdIdent();
-				cmdRecover(recoveryCode);
+				cmdRecover(ChatSettings.Me.RecoveryCode);
 				break;
 				
 			case "REGISTER": // добро на вход
@@ -258,8 +254,9 @@ public class Galaxy : MonoBehaviour {
 				cmdAddons();
 				//PlayerPrefs.GetString("planetName", null);
 				string s = null;//"pi100let";
-				if (customPlanetName != "")
-					s = customPlanetName;
+				var custom = ChatSettings.Me.CustomPlanetName;
+				if (!custom.IsNullOrWhiteSpace())
+					s = custom;
 				cmdJoin(s);
 				break;
 			
@@ -424,6 +421,11 @@ public class Galaxy : MonoBehaviour {
 		SendToServer("PRIVMSG 0 0 :"+message);
 	}
 	
+	void Log(string message){
+		if (DebugSettings.Me.DebugForGalaxy)
+			print(message);
+	}
+
 }
 
 

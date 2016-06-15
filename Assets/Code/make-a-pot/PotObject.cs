@@ -283,6 +283,7 @@ public class PotObject : MonoBehaviour {
     {
         float _angle, _u, _v;
         uint vertexInd = offset;
+
         for (uint i = 0; i <= verticesPerCircle; ++i) // create circle vertices
         {
             _angle = i * angleBetweenVertices;
@@ -340,4 +341,10 @@ public class PotObject : MonoBehaviour {
         }
         return 2 * verticesPerCircle * 3;
     }
+
+    void Log(string message){
+		if (DebugSettings.Me.DebugForPot)
+			print(message);
+	}
+
 }

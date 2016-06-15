@@ -4,6 +4,7 @@ using System.Collections;
 public class HandManager : MonoBehaviour {
 
 	public NetworkManager netMan;
+	public HandNetworkData.DataType handType;
 
 	public GameObject[] fingerTargets;
 	public GameObject[] fingerRoots;
@@ -19,16 +20,13 @@ public class HandManager : MonoBehaviour {
 	private Vector3 startHandPosition;
 	// private Vector3 moveToPosition;
 
-	public HandNetworkData.DataType handType;
-
 	private bool needReset = true;
 
 	private float[] fingerLengths = {0, 0, 0, 0, 0};
 
 
-	// Use this for initialization
 	void Start ()
-  {
+	{
 		startHandPosition = new Vector3 (this.transform.localPosition.x, this.transform.localPosition.y, this.transform.localPosition.z);
 		// moveToPosition = new Vector3 (this.transform.localPosition.x, this.transform.localPosition.y, this.transform.localPosition.z);
 
@@ -37,18 +35,20 @@ public class HandManager : MonoBehaviour {
 		}
 	}
 	
-	// Update is called once per frame
 	void Update () 
 	{
 		// Hand position
 		HandNetworkData.SingleHandData aData = netMan.GetHandData(handType);
-			
+
 		if (aData != null) {
 			if (Input.GetKeyDown("space")) {
 				needReset = true;
 			}
 
 			Vector3 palmPosition = aData.palmPosition;
+
+			//Log(aData.palmPosition.ToString());
+
 			if (needReset) {
 				palmPositionCorrection = startHandPosition - palmPosition * netDataFactor;
 			}
@@ -93,6 +93,11 @@ public class HandManager : MonoBehaviour {
 		if (fingerId >= fingerRoots.Length)
 			return new Vector3 (0.0f, 0.0f, 0.0f);
 		return netData * fingerLengths [fingerId] + fingerRoots[fingerId].transform.localPosition;
+	}
+
+	void Log(string message){
+		if (DebugSettings.Me.DebugForSenso)
+			print(message);
 	}
 
 }
