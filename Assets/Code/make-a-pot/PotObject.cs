@@ -25,18 +25,9 @@ public class PotObject : MonoBehaviour {
     private bool needTransform = false;    
     private Vector3[] currentVertices;
 
-    private Texture2D potTexture;
-
     // Use this for initialization
     void Start () 
     {
-        Shader sh1 = Shader.Find("Diffuse");
-        Material potMaterial = new Material(sh1);
-        potTexture = new Texture2D(1024, 1024);
-        // potTexture.SetPixels(Color.blue);
-        potMaterial.mainTexture = potTexture;
-        
-        
         radiuses = new float[layersCount];
         curRadiuses = new float[layersCount];
         angleBetweenVertices = 2 * Mathf.PI / verticesPerCircle;
@@ -279,7 +270,7 @@ public class PotObject : MonoBehaviour {
                 normals[vertexInd] = normalOverride.Value;
             else {
                 normals[vertexInd] = new Vector3(Mathf.Cos(_angle), normalVectorZ, Mathf.Sin(_angle));
-                uv[vertexInd] = new Vector2((float)i / (float)verticesPerCircle * 0.8f + 0.2f, V);
+                uv[vertexInd] = new Vector2((float)i / (float)verticesPerCircle /* * 0.8f + 0.2f */, V);
             }
             
             ++vertexInd;
