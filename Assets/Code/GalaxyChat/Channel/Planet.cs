@@ -171,26 +171,26 @@ public class Planet : MonoBehaviour {
 	void AddUser(User user){
 		var u = RemoveUser(user.id);
 		users.Add(user);
-		/*if (u != null){
-			var pos = u.transform.localPosition;
-			user.SetPos(pos);
-		}*/
 		InvokeUsersCountChanged();
 	}
 	
 	User RemoveUser(int userId){
 		var u = GetUserByID(userId);
 		if (u != null){
-			var p = u.place;
-			p.user = null; // "освободили" место
-			p.full = false;
-			users.Remove(u);
-			Destroy(u.gameObject);
+			RemoveUser(u);
 		}
-		InvokeUsersCountChanged();
 		return u;
 	}
 	
+	void RemoveUser(User u){
+		var p = u.place;
+		p.user = null; // "освободили" место
+		p.full = false;
+		users.Remove(u);
+		Destroy(u.gameObject);
+		InvokeUsersCountChanged();
+	}
+
 	void InvokeUsersCountChanged(){
 		if (OnUsersCountChanged != null)
 			OnUsersCountChanged(users.Count);
@@ -248,8 +248,10 @@ public class Planet : MonoBehaviour {
 	public void JoinUser(string[] param){
 		User user = NewUser();
 		UsersFactory.createUser(user, true, param, 0, true, true, true);
-		if (user.id == myUserId) // своего заново не добавляем
+		if (user.id == myUserId) {// своего заново не добавляем
+			Destroy(user.gameObject);
 			return;
+		}
 		// ставим
 		SetUserOnEmptyPlace(user);
 		AddUser(user);
