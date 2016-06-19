@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
 using System.Collections;
+using System;
 
 public class Galaxy : MonoBehaviour {
 
@@ -17,6 +18,8 @@ public class Galaxy : MonoBehaviour {
 	
 	int userId;
 	string userName, userPass, authCode;
+	string sessionId;
+	DateTime sessionTime;
 	TcpSocket socket;
 	TouchListener touch;
 	bool isWait353 = true;
@@ -25,18 +28,14 @@ public class Galaxy : MonoBehaviour {
 		
 		touch = GetComponent<TouchListener>();
 		
-		//planet = GetComponent<Planet>();
 		planet.OnUsersCountChanged += OnUsersCountChanged;
-		
-		socket = new TcpSocket();
-		socket.OnMessageReceived += OnMessageReceived;
 		
 		finger.OnSwipeChat += OnSwipeChat;
 		finger.OnSwipePlanet += OnSwipePlanet;
 		finger.OnExitCollision += OnExitCollision;
 		finger.OnEnterCollision += OnEnterCollision;
 		
-		Connect();
+		ConnectAsync();
 	}
 	
 	void OnEnterCollision(ColType type){
@@ -73,20 +72,39 @@ public class Galaxy : MonoBehaviour {
 		textUsersCount.text = "["+value+"]";
 	}
 	
-	public void Connect(){
-		ConnectInternal();
-	}
-	
-	public void ConnectAsync(){
-		StartCoroutine(ConnectInternal());
+	public void ConnectAsync(bool useDelay = false){
+		StartCoroutine(ConnectInternal(useDelay));
 	} 
 	
-	IEnumerator ConnectInternal(){
-		socket.Connect(ChatSettings.Me.Host, ChatSettings.Me.Port);
+	bool startConnect;
+	int connectCounter;
+	IEnumerator ConnectInternal(bool useDelay){
+		
+		if (useDelay){
+			yield return new WaitForSeconds(5f);// немного ждём, полезно для реконнекта
+		}
+
+		if (startConnect)
+			yield break;
+
+		startConnect = true;
+
+		if (socket == null){
+			socket = new TcpSocket();
+			socket.OnMessageReceived += OnMessageReceived;
+			socket.OnError += OnErrorReceived;
+		}
+		
+		
+		var connectInfo = ChatSettings.Me;
+		socket.Connect(connectInfo.Host, connectInfo.Port);
 		textEntering.gameObject.SetActive(true);
 		buttonConnect.gameObject.SetActive(false);
 		//chatTitle.gameObject.SetActive(false);
-		return null;
+
+		startConnect = false;
+		++connectCounter;
+		yield break;
 	} 
 	
 	void Disconnect(){
@@ -94,6 +112,7 @@ public class Galaxy : MonoBehaviour {
 		textEntering.gameObject.SetActive(false);
 		buttonConnect.gameObject.SetActive(true);
 		//chatTitle.gameObject.SetActive(false);
+		wasConnected = false;
 	}
 	
 	void OnDisable(){
@@ -112,8 +131,21 @@ public class Galaxy : MonoBehaviour {
 		}
 	}
 	
+	bool wasConnected;
+	float timeLastCmd;
 	void UpdateNetwork(){
-		socket.Update();
+		if (socket != null){
+			socket.Update();
+
+			var con = socket.IsConnected;
+			if (wasConnected){
+				var time = Time.realtimeSinceStartup; 
+				if (time > timeLastCmd+5f){// раз в 5 сек проверяем коннект
+					cmdPong();					
+				}
+			}
+			wasConnected = con;
+		}
 	}
 	
 	Vector2 prevPos;
@@ -155,17 +187,17 @@ public class Galaxy : MonoBehaviour {
 		}
 	}
 	
-	void StartFillChat(){
+	/*void StartFillChat(){
 		StartCoroutine(StartFillChatInternal());
 	} 
 	
 	IEnumerator StartFillChatInternal(){
 		for (int k = 0; k < 200; ++k){
-			AddMessage(userId, "testing chat message "+Random.Range(0,100));
+			AddMessage(userId, "testing chat message "+UnityEngine.Random.Range(0,100));
 			yield return new WaitForSeconds(0.3f);
 		}
 		yield break;
-	}
+	}*/
 	
 	public void SelectPlanet(){
 		InputBox.OnButtonOkPressed += OnPlanetNameEntered;
@@ -179,14 +211,14 @@ public class Galaxy : MonoBehaviour {
 			cmdJoin(value);
 	}
 	
-	public void SendMessageFromInput(){
+	/*void SendMessageFromInput(){
 		var s = inputMessage.text.Trim();
 		if (s != ""){
 			cmdPrivmsg(s);
 			chat.AddMessage(userName, s);
 			inputMessage.text = "";
 		}
-	}
+	}*/
 	
 	void AddMessage(int userId, string msg){
 		string nick = null;
@@ -202,6 +234,7 @@ public class Galaxy : MonoBehaviour {
 	void SendToServer(string message){
 		socket.Write(message);
 		Log(">> " + message);
+		timeLastCmd = Time.realtimeSinceStartup;
 	}
 	
 	void OnEnterChannel(){
@@ -211,7 +244,36 @@ public class Galaxy : MonoBehaviour {
 		PlayerPrefs.SetString("planetName", planet.Name);
 	}
 	
+	void OnErrorReceived (object sender, TcpErrorEventArgs args) {
+		wasConnected = false;
+		Log("OnErrorReceived: "+args.Message);
+		if (ChatSettings.Me.UseReconnection)
+			ConnectAsync(true);
+	}
+
+	void ReadPrefs(){
+		userName = PlayerPrefs.GetString("galaxy-userName", null);
+		userPass = PlayerPrefs.GetString("galaxy-userPass", null);
+		userId = PlayerPrefs.GetInt("galaxy-userId", 0);
+		sessionId = PlayerPrefs.GetString("galaxy-sessionId", null);
+		var t = PlayerPrefs.GetString("galaxy-sessionTime", null);
+		sessionTime = (t != null ? DateTime.Parse(t) : DateTime.Now);
+	}
+	void WriteUserPrefs(){
+		PlayerPrefs.SetString("galaxy-userName", userName);
+		PlayerPrefs.SetString("galaxy-userPass", userPass);
+		PlayerPrefs.SetInt("galaxy-userId", userId);
+	}
+	void WriteSessionPrefs(bool adjustCurrentTime){
+		if (adjustCurrentTime){
+			sessionTime = DateTime.Now;
+		}
+		PlayerPrefs.SetString("galaxy-sessionId", sessionId);
+		PlayerPrefs.SetString("galaxy-sessionTime", sessionTime.ToString());
+	}
+
 	void OnMessageReceived (string message) {
+		timeLastCmd = Time.realtimeSinceStartup;
 		if (message.Contains("\r\n")){
 			var arr = Regex.Split(message, "\r\n");
 			foreach (var m in arr){
@@ -239,7 +301,12 @@ public class Galaxy : MonoBehaviour {
 				var code = c.Parameters[0];
 				authCode = SessionCodeGenerator.Generate(code);
 				cmdIdent();
-				cmdRecover(ChatSettings.Me.RecoveryCode);
+				ReadPrefs();
+				if (!userPass.IsNullOrWhiteSpace()){
+					cmdUser();
+				} else {
+					cmdRecover(ChatSettings.Me.RecoveryCode);
+				}
 				break;
 				
 			case "REGISTER": // добро на вход
@@ -248,6 +315,7 @@ public class Galaxy : MonoBehaviour {
 				userName = c.Parameters[2].Trim();
 				cmdUser();
 				planet.myUserId = userId;
+				WriteUserPrefs();
 				break;
 				
 			case "999": // auth OK
@@ -401,7 +469,22 @@ public class Galaxy : MonoBehaviour {
 		SendToServer("RECOVER "+recovery);
 	}
 	
+	/*long Millisecs(){
+		return (long)(DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
+	}*/
+
 	private void cmdUser(){
+		
+		var time = DateTime.Now;
+		var dt = time-sessionTime;
+		
+		// если ещё нет сессии или она устарела (> 10 мин)
+		if (sessionId.IsNullOrWhiteSpace() || dt.TotalMinutes > 10f){
+			sessionId = SessionCodeGenerator.RandomAbc(16);
+			sessionTime = time;
+			WriteSessionPrefs(false);
+			Log("galaxy. generate new session id");
+		}
 		// USER <user_id> <user_password> <user_nick> <session_code> [<auth_code>]
 		const string commandFormat = "USER {0} {1} {2} {3} {4}";
 		var loginCommand = string.Format(commandFormat,
@@ -409,12 +492,15 @@ public class Galaxy : MonoBehaviour {
 											userPass,
 											userName,
 											authCode,
-											SessionCodeGenerator.RandomAbc(16));
+											sessionId);
 		SendToServer(loginCommand);
 	}
 
 	private void cmdQuit(){
-		SendToServer("QUIT :ds");
+		if (connectCounter > 0){
+			SendToServer("QUIT :ds");
+			WriteSessionPrefs(true);
+		}
 	}
 	
 	private void cmdPrivmsg(string message){

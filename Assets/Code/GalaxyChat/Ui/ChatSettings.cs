@@ -9,7 +9,8 @@ public class ChatSettings : MonoBehaviour {
 	public string RecoveryCode;
 	public string Host = "galaxy.mobstudio.ru";
 	public int Port = 6667;
-
+	public bool UseReconnection = true;
+	
 	public InputField inputServer, inputRecovery;
 
 	void Awake () {
