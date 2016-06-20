@@ -40,8 +40,11 @@ public class Chat : MonoBehaviour {
 		go.transform.localScale = Vector3.one;
 		go.transform.localRotation = Quaternion.identity;
 		go.transform.localPosition = Vector3.zero;
+
 		var txt = go.transform.Find("Text").GetComponent<Text>();
+		message = Smiles.Replace(message);
 		txt.text = message;
+		
 		txt = go.transform.Find("Nick").GetComponent<Text>();
 		if (nick != null)
 			txt.text = nick;

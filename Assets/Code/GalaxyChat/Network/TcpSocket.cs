@@ -1,12 +1,11 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
 
 public enum TcpError{
 	Read, Write, Connect
 }
-	
+
 public class TcpErrorEventArgs : EventArgs {
 	public TcpError ErrorType {get;private set;}
 	public string Message {get;private set;}
@@ -44,10 +43,20 @@ public class TcpSocket {
 	
 	public void Connect(string host, int port) {
 		try {
-			theClient = new TcpClient(host, port);
+			theClient = new TcpClient();
+			
+			var result = theClient.BeginConnect(host, port, null, null);
+			var success = result.AsyncWaitHandle.WaitOne(5000);// ждём 5 сек
+			if (!success){
+				InvokeOnError(TcpError.Connect, "Connection timeout");
+				return;
+			}
+			theClient.EndConnect(result);
+
 			theStream = theClient.GetStream();
 			theWriter = new StreamWriter(theStream);
 			inStream = new Byte[theClient.ReceiveBufferSize];
+			theClient.SendTimeout = 5;
 			socketReady = true;
 		}
 		catch (Exception e) {
@@ -56,6 +65,10 @@ public class TcpSocket {
 		
 	}
 	
+	public bool IsConnected{
+		get { return theClient != null ? theClient.Connected : false; }
+	}
+
 	public void Write(string theLine) {
 		if (!socketReady)
 			return;
