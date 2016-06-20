@@ -3,8 +3,8 @@
 	Properties
 	{
 		_MainTexture ("Plasma texture", 2D) = "white" {}
-		_Radius("Gradient radius", Range (0, 1)) = 0.5
-		_Speed ("Speed", float) = 25
+		_Radius("Gradient radius", Range (0, 1)) = 0.3
+		_Speed ("Speed", float) = 1
 	}
 	SubShader
 	{
@@ -18,6 +18,11 @@
 			sampler2D _MainTexture;
 			fixed _Radius;
 			fixed _Speed;
+			float _XOffset;
+			float _YOffset;
+			float _XSines;
+			float _YSines;
+			float _Size;
 			static const float PI = 3.14159265f;
 
 			struct appdata 
@@ -44,12 +49,16 @@
 			{
 				float offsetX = (cos(_Time.y * _Speed) + 1.0f) * 0.3f;
 				float offsetY = (sin(_Time.y * _Speed) + 1.0f) * 0.3f;
-
 				float2 coord = float2((i.texcoord.x - offsetX) / _Radius, (i.texcoord.y - offsetY) / _Radius); 
 				fixed gradColor = (coord.x * coord.x + coord.y * coord.y);
+				
+				float K = (_Time.x) % 2.0f;
+				if (K > 1.0f) K = 2.0f - K;
+				
+				fixed4 aColor = fixed4((1.0f - K), K, gradColor, 1.0f);
+				fixed4 textureColor = tex2D(_MainTexture, float2(i.texcoord.x + _Time.x * 1.5f * _Speed, i.texcoord.y));
 
-				fixed4 aColor = fixed4(1.0f, 1.0f, gradColor, 1.0f);
-				return aColor * tex2D(_MainTexture, float2(i.texcoord.x + _Time.x * 1.5f * _Speed, i.texcoord.y));
+				return aColor * textureColor;
 			}
 
 			ENDCG

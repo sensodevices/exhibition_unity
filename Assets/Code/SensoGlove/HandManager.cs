@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class HandManager : MonoBehaviour {
@@ -8,63 +8,46 @@ public class HandManager : MonoBehaviour {
 
 	public GameObject[] fingerTargets;
 	public GameObject[] fingerRoots;
-	
+
 	public Transform wrist;
 	public Transform targetContainer;
 
-	private float netDataFactor = 0.5f; //0.015f;
-	private Vector3 palmPositionCorrection = new Vector3 (0.0f, 0.0f, 0.0f);
-	private Vector3 palmAnglesCorrection = new Vector3 (0.0f, 0.0f, 0.0f);
-	private Vector3 wristAnglesCorrection = new Vector3 (0.0f, 0.0f, 0.0f);
-
+	private float netDataFactor = 0.015f;
 	private Vector3 startHandPosition;
-	// private Vector3 moveToPosition;
-
-	private bool needReset = true;
-
+	private Vector3 startHandRotation;
 	private float[] fingerLengths = {0, 0, 0, 0, 0};
 
 
 	void Start ()
 	{
 		startHandPosition = new Vector3 (this.transform.localPosition.x, this.transform.localPosition.y, this.transform.localPosition.z);
-		// moveToPosition = new Vector3 (this.transform.localPosition.x, this.transform.localPosition.y, this.transform.localPosition.z);
+		startHandRotation = new Vector3 (this.transform.eulerAngles.x, this.transform.eulerAngles.y, this.transform.eulerAngles.z);
 
 		for (int i = 0; i < fingerRoots.Length; ++i) {
 			fingerLengths [i] = Vector3.Distance (fingerRoots [i].transform.localPosition, fingerTargets[i].transform.localPosition);
 		}
+		BroadcastMessage("SetHandType", handType);
 	}
-	
-	void Update () 
+
+	void Update ()
 	{
 		// Hand position
 		HandNetworkData.SingleHandData aData = netMan.GetHandData(handType);
 
-		if (aData != null) {
-			if (Input.GetKeyDown("space")) {
-				needReset = true;
-			}
-
+		if (aData != null)
+		{
 			Vector3 palmPosition = aData.palmPosition;
-
-			//Log(aData.palmPosition.ToString());
-
-			if (needReset) {
-				palmPositionCorrection = startHandPosition - palmPosition * netDataFactor;
-			}
-			palmPosition = palmPosition * netDataFactor + palmPositionCorrection;
+			palmPosition = palmPosition * netDataFactor + startHandPosition;
 			if (this.transform.localPosition != palmPosition) {
 				this.transform.localPosition = Vector3.Lerp(this.transform.localPosition, palmPosition, Time.deltaTime * 10);
 			}
-			
+
 			// Rotation
 			// X   Z
 			// | /
 			// . - Y
 			Vector3 palmRotation = aData.palmRotation;
-			palmRotation += palmAnglesCorrection;
-
-			this.transform.eulerAngles = new Vector3(0, 0, 0);
+			this.transform.eulerAngles = startHandRotation;
 			this.transform.Rotate(Vector3.right, palmRotation.x);
 			this.transform.Rotate(Vector3.back, palmRotation.y);
 			this.transform.Rotate(Vector3.down, palmRotation.z);
@@ -75,29 +58,22 @@ public class HandManager : MonoBehaviour {
 
 			// wrist.transform.localEulerAngles = new Vector3(0.0f, wristRotation.y, -wristRotation.x);
 			// targetContainer.transform.localEulerAngles = new Vector3(-wristRotation.x, wristRotation.y, 0.0f);
-			
+
 			//Fingers
 			for (var i = 0; i < fingerTargets.Length; ++i) {
-				Vector3 fingerPosition = calcFingerPosition ((uint)i, aData.fingerPositions[i]);
+				Vector3 fingerPosition = calcFingerPosition((uint)i, aData.fingerPositions[i]);
 				if (fingerPosition != fingerTargets[i].transform.localPosition) {
 					fingerTargets[i].transform.localPosition = Vector3.Lerp(fingerTargets[i].transform.localPosition, fingerPosition, Time.deltaTime * 10);
 				}
 			}
-
-			needReset = false;
 		}
 	}
 
 
-	Vector3 calcFingerPosition (uint fingerId, Vector3 netData) {
+	Vector3 calcFingerPosition(uint fingerId, Vector3 netData) {
 		if (fingerId >= fingerRoots.Length)
-			return new Vector3 (0.0f, 0.0f, 0.0f);
+		return new Vector3 (0.0f, 0.0f, 0.0f);
 		return netData * fingerLengths [fingerId] + fingerRoots[fingerId].transform.localPosition;
-	}
-
-	void Log(string message){
-		if (DebugSettings.Me.DebugForSenso)
-			print(message);
 	}
 
 }

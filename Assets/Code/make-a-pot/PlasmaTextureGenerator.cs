@@ -27,7 +27,7 @@ public class PlasmaTextureGenerator {
         for (var y = 0; y < m_size; ++y) {
             for (var x = 0; x < m_size; ++x) {
                 float grColor = (getVal(x, y)) / 255.0f;
-                Color color = new Color(1.0f, grColor, grColor, 1.0f);
+                Color color = new Color(grColor, grColor, grColor, 1.0f);
                 aTexture.SetPixel(x, y, color);
             }
         }
