@@ -18,8 +18,8 @@ public class UsersFactory {
             if (checkSex) {
                 user.SetSex(param[ind++].ToInt());
             }
-            View view = new View();
-			user.AddView(view);
+            //View view = new View();
+			//user.AddView(view);
 			
 			int val = Math.Abs(param[ind++].ToInt());
 			for (int k = 0 ; k < val ; ++k) {
@@ -45,7 +45,7 @@ public class UsersFactory {
 					img.SetPos(px, py);
 					img.SetAnchor(anchor);
 					img.layer = -k;
-					view.AddImage(img);
+					//view.AddImage(img);
 					//
 					user.LoadImage(img);
 				}

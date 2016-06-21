@@ -157,6 +157,7 @@ public class Planet : MonoBehaviour {
 		var go = Prefabs.NewInstantce(Prefabs.Me.UserObj);
 		go.transform.SetParent(transform);
 		var u = go.GetComponent<User>();
+		go.transform.localScale = u.PrefferedScale;
 		return u;
 	}
 	
@@ -168,8 +169,17 @@ public class Planet : MonoBehaviour {
 		return null;
 	}
 	
+	bool Filtering(User user){
+		// залипуха, чтобы ящик от "пушек и бочек" не добавлять, он вид портит
+		return !user.HasImageWithUrl("temp/c/box_", true);
+	}
+
 	void AddUser(User user){
-		var u = RemoveUser(user.id);
+		var ok = Filtering(user);
+		if (!ok)
+			return;
+		RemoveUser(user.id);
+		SetUserOnEmptyPlace(user);
 		users.Add(user);
 		InvokeUsersCountChanged();
 	}
@@ -228,8 +238,6 @@ public class Planet : MonoBehaviour {
             try {
 				User user = NewUser();
 				UsersFactory.createUser(user, true, param, k, true, false, false);
-				// ставим
-				SetUserOnEmptyPlace(user);
 				AddUser(user);
 				int head = param[k+3].ToInt();
 				if (head < 0) {

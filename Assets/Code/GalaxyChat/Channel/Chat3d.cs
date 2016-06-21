@@ -2,13 +2,14 @@
 
 public class Chat3d : MonoBehaviour {
 
+	public MeshRenderer meshAsDisplay, meshAsSubDisplay;
 	public RenderTexture renderTexture;
 	public Camera cam;
 	Color defColor;
-	
+	// 448491FF
 	void Start () {
-		var mesh = GetComponent<MeshRenderer>();
-		mesh.material.mainTexture = renderTexture;
+		meshAsDisplay.material.mainTexture = renderTexture;
+		meshAsSubDisplay.material.mainTexture = renderTexture;
 		defColor = cam.backgroundColor;
 	}
 	

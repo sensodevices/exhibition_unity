@@ -6,15 +6,20 @@ public class User : MonoBehaviour {
 
 	public TextMesh textName;
 	public int id;
-	
+	public float scaleFactor = 1f;
 	public Place place;
 	
-	List<View> views = new List<View>();
+	public Vector3 PrefferedScale{ get; private set; }
+
+	//List<View> views = new List<View>();
 	List<ImageObject> images = new List<ImageObject>();
 	string clan;
-	
 	int sex;
-		
+	
+	void OnEnable(){
+		PrefferedScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+	}
+	
 	public void SetId(int value){
 		id = value;
 	}
@@ -47,12 +52,13 @@ public class User : MonoBehaviour {
 	public void SetPos(Vector3 pos){
 		transform.localPosition = pos;
 	}
-	public void AddView(View v){
+	/*public void AddView(View v){
 		views.Add(v);
-	}
+	}*/
 	
 	void OnImageLoaded(ImageObject image){
 		//print("image.loaded: "+image.url);
+
 		var go = new GameObject();
 		go.name = image.url;
 		var rend = go.AddComponent<SpriteRenderer>();
@@ -60,6 +66,9 @@ public class User : MonoBehaviour {
 		rend.sprite = Sprite.Create(image.tex2d,new Rect(0,0,image.tex2d.width,image.tex2d.height),new  Vector2(0.5f,0));
 		go.transform.SetParent(transform);
 		go.transform.localPosition = new Vector2(image.x, image.y);
+		go.transform.localScale = Vector3.one;
+
+		
 	}
 	
 	public ImageObject NewImageObject(string url){
@@ -86,6 +95,19 @@ public class User : MonoBehaviour {
 		}
 		return null;
 	}
+
+	public bool HasImageWithUrl(string url, bool startsWith=false){
+		foreach (var i in images){
+			if (startsWith){
+				if (i.url.StartsWith(url))
+					return true;
+			} else {
+				if (i.url == url)
+					return true;
+			}
+		}
+		return false;
+	}
 	
 	// заставляем персов всегда смотреть в одном направлении, на камеру
 	void LateUpdate(){
@@ -93,7 +115,7 @@ public class User : MonoBehaviour {
 		//transform.LookAt(trans);
 		//var e = transform.rotation.eulerAngles;
 		//e.x = e.z = 0;
-		transform.rotation = Quaternion.Euler(Vector3.zero);
+		transform.rotation = Quaternion.Euler(new Vector3(0,180,0));
 	}
 	
 }
