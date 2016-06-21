@@ -118,4 +118,8 @@ public class User : MonoBehaviour {
 		transform.rotation = Quaternion.Euler(new Vector3(0,180,0));
 	}
 	
+	public void SetNickVisibility(bool visible){
+		textName.gameObject.SetActive(visible);
+	}
+	
 }

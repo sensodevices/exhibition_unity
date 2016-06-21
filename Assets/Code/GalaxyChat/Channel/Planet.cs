@@ -150,9 +150,24 @@ public class Planet : MonoBehaviour {
 			transform.Rotate(Vector3.up, step);
 			yield return new WaitForSeconds(0.02f);
 		}
+		UpdateNicks();
 		yield break;
 	}
-		
+
+	// смотрим какие юзеры ближе к камере, ники только у них рисуем 
+	void UpdateNicks(){
+		var maxDist = 1.4f;
+		var orient = transform.position + new Vector3(0,0,2);
+		foreach (var item in places){
+			if (item.user == null)
+				continue;
+			var d = Vector3.Distance(orient, item.user.transform.position);
+			//Log.Galaxy("dist: "+d);
+			var vis = (d < maxDist);
+			item.user.SetNickVisibility(vis);
+		}
+	}	
+
 	User NewUser(){
 		var go = Prefabs.NewInstantce(Prefabs.Me.UserObj);
 		go.transform.SetParent(transform);
@@ -182,6 +197,7 @@ public class Planet : MonoBehaviour {
 		SetUserOnEmptyPlace(user);
 		users.Add(user);
 		InvokeUsersCountChanged();
+		//UpdateNicks();
 	}
 	
 	User RemoveUser(int userId){
@@ -251,6 +267,7 @@ public class Planet : MonoBehaviour {
 				throw new Exception("PARSE ERROR");
 			}
         }
+		UpdateNicks();
 	}
 	
 	public void JoinUser(string[] param){
@@ -261,8 +278,8 @@ public class Planet : MonoBehaviour {
 			return;
 		}
 		// ставим
-		SetUserOnEmptyPlace(user);
 		AddUser(user);
+		UpdateNicks();
 	}
 	
 	public void PartUser(string[] param){
