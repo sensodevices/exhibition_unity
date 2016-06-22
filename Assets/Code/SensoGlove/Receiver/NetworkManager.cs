@@ -23,7 +23,7 @@ public class NetworkManager : MonoBehaviour
   }
 
   private string sensoHost {
-    get { return "192.168.15.79"; }
+    get { return "192.168.15.195"; }
   }
   private int sensoPort {
     get { return 13456; }
@@ -223,7 +223,6 @@ public class NetworkManager : MonoBehaviour
         msg[1] = 0x1;
         msg[2] = (byte)((fingerId << 5) | (duration & 0x1F));
         tcpState.is_sending = true;
-        Debug.Log("vibrate " + fingerId + " " + duration);
         try {
           tcpState.stream.BeginWrite(msg, 0, 3, m_SendCb, tcpState);
         } catch (Exception err) {

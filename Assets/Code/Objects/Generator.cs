@@ -23,11 +23,17 @@ public class Generator : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
 		if (spawnedObject == null) {
 			var newInd = numberGenerator.Next(spawnableObjects.Length);
 			spawnedObject = (GameObject)Instantiate(spawnableObjects[newInd], spawnPosition, spawnRotation);
 			spawnedObject.transform.parent = transform;
+		}
+	}
+
+	void OnTriggerExit(Collider other) {
+		if (other.gameObject == spawnedObject) {
+			spawnedObject = null;
 		}
 	}
 }

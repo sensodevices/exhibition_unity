@@ -16,6 +16,7 @@ public class FingersCollidedEventArgs : EventArgs
   }
 }
 
+
 /// <summary>Senso Glove event emitter</summary>
 public class SensoEventEmitter : MonoBehaviour {
 
@@ -24,9 +25,9 @@ public class SensoEventEmitter : MonoBehaviour {
     BroadcastMessage("RegisterEventEmitter", this);
   }
 
-  public event EventHandler<FingersCollidedEventArgs> onFingersCollided;
-  public event EventHandler<FingersCollidedEventArgs> onFingersReleased;
-
+  public event EventHandler<FingersCollidedEventArgs> onFingersCollided = delegate {}; // Is fired when two fingers' colliders entered each other
+  public event EventHandler<FingersCollidedEventArgs> onFingersReleased = delegate {}; // Is fired when two fingers' colliders exit each other
+  
   public void fingerCollided(FingerTarget finger1, FingerTarget finger2)
   {
     if (finger1.fingerId > finger2.fingerId) {
