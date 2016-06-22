@@ -3,10 +3,15 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 
+/* Item */
+
 public class MenuItem {
 	public string Text, Action;
 	public GameObject obj;
 }
+
+
+/* Menu */
 
 public class MenuActions : MonoBehaviour {
 
@@ -18,8 +23,10 @@ public class MenuActions : MonoBehaviour {
 	public delegate void ClickItemFunc(MenuItem item);
 	public ClickItemFunc OnItemClick;
 	
+	public int AssociatedUserId {get;private set;}
+
 	List<MenuItem> items = new List<MenuItem>();
-	int associatedUserId;
+	
 	
 	void Awake(){
 		Me = this;
@@ -39,7 +46,7 @@ public class MenuActions : MonoBehaviour {
 	}
 	
 	public void ShowLocal (int associatedUserId, string userName) {
-		this.associatedUserId = associatedUserId;
+		AssociatedUserId = associatedUserId;
 		var s = string.Format("Actions on {0}", userName);
 		textTitle.text = s;
 		gameObject.SetActive(true);
@@ -72,7 +79,18 @@ public class MenuActions : MonoBehaviour {
 			go.transform.localPosition = Vector3.zero;
 			var txt = go.transform.Find("Text").GetComponent<Text>();
 			txt.text = item.Text;
+			// клик
+			var btn = go.GetComponent<Button>();
+			var i = item;
+			btn.onClick.AddListener( () => {
+				Me.InvokeItemClick(i);
+				
+			} );
 		}
 	}
 	
+	void InvokeItemClick(MenuItem item){
+		if (OnItemClick != null)
+			OnItemClick(item);
+	}
 }
