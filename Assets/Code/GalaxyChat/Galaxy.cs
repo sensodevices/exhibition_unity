@@ -39,7 +39,18 @@ public class Galaxy : MonoBehaviour {
 		
 		ChatSettings.Me.OnChanged += OnSettingsChanged;
 
+		MenuActions.Me.OnItemClick += OnMenuActionsItemClick;
+
 		ConnectAsync();
+	}
+
+	void OnMenuActionsItemClick(MenuItem item){
+		var menu = MenuActions.Me;
+		var userId = menu.AssociatedUserId;
+		if (userId == 0)
+			userId = this.userId;
+		cmdAction(userId, item.Action);
+		menu.DismissLocal();
 	}
 
 	void OnSettingsChanged(){
@@ -540,7 +551,10 @@ public class Galaxy : MonoBehaviour {
 		SendToServer("PRIVMSG 0 0 :"+message);
 	}
 	
-	
+	private void cmdAction(int userId, string action){
+		SendToServer("ACTION "+action+" "+userId);
+	}
+
 }
 
 
