@@ -16,7 +16,8 @@ public class Galaxy : MonoBehaviour {
 	public Chat chat;
 	public Chat3d chat3d;
 	public float pongCmdFreqInSecs = 10;
-	
+	//public string forceRecoveryCode;
+
 	int userId;
 	string userName, userPass, authCode;
 	string sessionId;
@@ -36,6 +37,17 @@ public class Galaxy : MonoBehaviour {
 		finger.OnExitCollision += OnExitCollision;
 		finger.OnEnterCollision += OnEnterCollision;
 		
+		ChatSettings.Me.OnChanged += OnSettingsChanged;
+
+		ConnectAsync();
+	}
+
+	void OnSettingsChanged(){
+		userPass = "";
+		userName = "";
+		userId = 0;
+		WriteUserPrefs();// забываем параметры текущего перса, чтобы 1 раз войти по рековери
+		Disconnect();
 		ConnectAsync();
 	}
 	
@@ -306,7 +318,7 @@ public class Galaxy : MonoBehaviour {
 				if (!userPass.IsNullOrWhiteSpace()){
 					cmdUser();
 				} else {
-					cmdRecover(ChatSettings.Me.RecoveryCode);
+					cmdRecover();
 				}
 				break;
 				
@@ -360,6 +372,10 @@ public class Galaxy : MonoBehaviour {
 				break;
 				
 			case "451": // ошибки
+				// входили с другого устройства, нужно войти по рековери
+				cmdRecover();
+				break;
+
 			case "452":
 			case "432":
 			case "433":
@@ -370,7 +386,18 @@ public class Galaxy : MonoBehaviour {
 				break;
 			
 			case "471": // планета переполнена
-				MessageBox.Show("System Notice", c.Postfix);
+				var msg = c.Postfix;
+				if (!joinPlanetName.IsNullOrWhiteSpace()){
+					msg += " ("+joinPlanetName+")";
+					// на спец. кнопку вешаем собитие повторного джоина
+					Action onClick = ()=>{
+						cmdJoin(joinPlanetName);
+						MessageBox.Dismiss();
+					};
+					MessageBox.EnableSpecialButton("Try Again", onClick);
+				}
+				MessageBox.Show("System Notice", msg);
+				
 				//Disconnect();
 				break;
 				
@@ -451,11 +478,13 @@ public class Galaxy : MonoBehaviour {
 		SendToServer("PONG");
 	}
 	
+	string joinPlanetName;
 	private void cmdJoin(string planetName=null){
 		var s = "JOIN";
 		if (planetName != null)
 			s += " "+planetName;
 		SendToServer(s);
+		joinPlanetName = planetName;
 	}
 	
 	private void cmdAddons(){
@@ -466,8 +495,11 @@ public class Galaxy : MonoBehaviour {
 	private void cmdIdent(){
 		SendToServer(":en IDENT 186 -1 4030 1 2 :GALA");
 	}
-	private void cmdRecover(string recovery){
-		SendToServer("RECOVER "+recovery);
+	private void cmdRecover(){
+		var code = ChatSettings.Me.RecoveryCode;
+		//if (!forceRecoveryCode.IsNullOrWhiteSpace())
+		//	code = forceRecoveryCode;
+		SendToServer("RECOVER "+code);
 	}
 	
 	/*long Millisecs(){

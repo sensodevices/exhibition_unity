@@ -13,6 +13,10 @@ public class ChatSettings : MonoBehaviour {
 	
 	public InputField inputServer, inputRecovery;
 
+	public delegate void ChangedFunc();
+	public ChangedFunc OnChanged;
+		
+
 	void Awake () {
 		Me = this;
 		LoadPrefs();
@@ -49,6 +53,8 @@ public class ChatSettings : MonoBehaviour {
 		PlayerPrefs.SetInt("host", Port);
 		PlayerPrefs.SetString("recovery", RecoveryCode);
 		PlayerPrefs.Save();
+		if (OnChanged != null)
+			OnChanged();
 	}
 
 }
