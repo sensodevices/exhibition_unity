@@ -15,6 +15,7 @@ public class Galaxy : MonoBehaviour {
 	public Finger finger;
 	public Chat chat;
 	public Chat3d chat3d;
+	public float pongCmdFreqInSecs = 10;
 	
 	int userId;
 	string userName, userPass, authCode;
@@ -140,7 +141,7 @@ public class Galaxy : MonoBehaviour {
 			var con = socket.IsConnected;
 			if (wasConnected){
 				var time = Time.realtimeSinceStartup; 
-				if (time > timeLastCmd+5f){// раз в 5 сек проверяем коннект
+				if (time > timeLastCmd+pongCmdFreqInSecs){// раз в 5 сек проверяем коннект
 					cmdPong();					
 				}
 			}
@@ -233,7 +234,7 @@ public class Galaxy : MonoBehaviour {
 	
 	void SendToServer(string message){
 		socket.Write(message);
-		Log(">> " + message);
+		Log.Galaxy(">> " + message);
 		timeLastCmd = Time.realtimeSinceStartup;
 	}
 	
@@ -246,7 +247,7 @@ public class Galaxy : MonoBehaviour {
 	
 	void OnErrorReceived (object sender, TcpErrorEventArgs args) {
 		wasConnected = false;
-		Log("OnErrorReceived: "+args.Message);
+		Log.Galaxy("OnErrorReceived: "+args.Message);
 		if (ChatSettings.Me.UseReconnection)
 			ConnectAsync(true);
 	}
@@ -288,7 +289,7 @@ public class Galaxy : MonoBehaviour {
 		if (message == "")
 			return;
 		//log("<< '" + message + "'");
-		Log("<< " + message);
+		Log.Galaxy("<< " + message);
 		GalaCommand c = new GalaCommand(message.Trim());
 		/*print("prefix: "+c.Prefix);
 		print("name: "+c.Name);
@@ -483,7 +484,7 @@ public class Galaxy : MonoBehaviour {
 			sessionId = SessionCodeGenerator.RandomAbc(16);
 			sessionTime = time;
 			WriteSessionPrefs(false);
-			Log("galaxy. generate new session id");
+			Log.Galaxy("galaxy. generate new session id");
 		}
 		// USER <user_id> <user_password> <user_nick> <session_code> [<auth_code>]
 		const string commandFormat = "USER {0} {1} {2} {3} {4}";
@@ -507,11 +508,7 @@ public class Galaxy : MonoBehaviour {
 		SendToServer("PRIVMSG 0 0 :"+message);
 	}
 	
-	void Log(string message){
-		if (DebugSettings.Me.DebugForGalaxy)
-			print(message);
-	}
-
+	
 }
 
 

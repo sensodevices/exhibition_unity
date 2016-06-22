@@ -364,12 +364,6 @@ public class PotObject : MonoBehaviour {
       return 2 * verticesPerCircle * 3;
     }
 
-    void Log(string message){
-      if (DebugSettings.Me.DebugForPot)
-      print(message);
-    }
-
-
     // Senso!
     public void SetSensoManager(GameObject sensoMan)
     {

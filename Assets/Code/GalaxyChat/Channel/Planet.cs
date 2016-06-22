@@ -150,13 +150,29 @@ public class Planet : MonoBehaviour {
 			transform.Rotate(Vector3.up, step);
 			yield return new WaitForSeconds(0.02f);
 		}
+		UpdateNicks();
 		yield break;
 	}
-		
+
+	// смотрим какие юзеры ближе к камере, ники только у них рисуем 
+	void UpdateNicks(){
+		var maxDist = 1.4f;
+		var orient = transform.position + new Vector3(0,0,2);
+		foreach (var item in places){
+			if (item.user == null)
+				continue;
+			var d = Vector3.Distance(orient, item.user.transform.position);
+			//Log.Galaxy("dist: "+d);
+			var vis = (d < maxDist);
+			item.user.SetNickVisibility(vis);
+		}
+	}	
+
 	User NewUser(){
 		var go = Prefabs.NewInstantce(Prefabs.Me.UserObj);
 		go.transform.SetParent(transform);
 		var u = go.GetComponent<User>();
+		go.transform.localScale = u.PrefferedScale;
 		return u;
 	}
 	
@@ -168,10 +184,20 @@ public class Planet : MonoBehaviour {
 		return null;
 	}
 	
+	bool Filtering(User user){
+		// залипуха, чтобы ящик от "пушек и бочек" не добавлять, он вид портит
+		return !user.HasImageWithUrl("temp/c/box_", true);
+	}
+
 	void AddUser(User user){
-		var u = RemoveUser(user.id);
+		var ok = Filtering(user);
+		if (!ok)
+			return;
+		RemoveUser(user.id);
+		SetUserOnEmptyPlace(user);
 		users.Add(user);
 		InvokeUsersCountChanged();
+		//UpdateNicks();
 	}
 	
 	User RemoveUser(int userId){
@@ -228,8 +254,6 @@ public class Planet : MonoBehaviour {
             try {
 				User user = NewUser();
 				UsersFactory.createUser(user, true, param, k, true, false, false);
-				// ставим
-				SetUserOnEmptyPlace(user);
 				AddUser(user);
 				int head = param[k+3].ToInt();
 				if (head < 0) {
@@ -243,6 +267,7 @@ public class Planet : MonoBehaviour {
 				throw new Exception("PARSE ERROR");
 			}
         }
+		UpdateNicks();
 	}
 	
 	public void JoinUser(string[] param){
@@ -253,8 +278,8 @@ public class Planet : MonoBehaviour {
 			return;
 		}
 		// ставим
-		SetUserOnEmptyPlace(user);
 		AddUser(user);
+		UpdateNicks();
 	}
 	
 	public void PartUser(string[] param){
