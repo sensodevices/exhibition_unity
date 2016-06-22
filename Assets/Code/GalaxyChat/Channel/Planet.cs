@@ -18,6 +18,7 @@ public class Place {
 public class Planet : MonoBehaviour {
 
 	public MeshRenderer mesh;
+	public Color highlightColor = new Color(1.0f, 0.3960f, 0.0666f, 1.0f);
 	public float rotateSpeed = 15.5f;
 	public float minimalScrollDelta;
 	public float persDistance = 5.2f;
@@ -35,10 +36,30 @@ public class Planet : MonoBehaviour {
 	List<Place> places = new List<Place>();
 	Color defColor;
 	Place selPlace;
+
+	private float m_colorChangeDt = 1.0f;
+	private int m_colorChangingDir = 0; // 1 = def to highlight, -1 = highlight to def
 	
 	void Start(){
 		InitPlaces();
 		defColor = mesh.material.color;
+	}
+
+	void Update() {
+		if (m_colorChangingDir != 0) {
+			m_colorChangeDt += Time.deltaTime;
+			Color c1 = m_colorChangingDir == 1 ? defColor : highlightColor;
+			Color c2 = m_colorChangingDir == 1 ? highlightColor : defColor; 
+
+			if (m_colorChangeDt > 1.0f) {
+				mesh.material.color = c2;
+				m_colorChangingDir = 0;
+			} else {
+				Color curColor = mesh.material.color;
+				curColor.r = Mathf.Lerp(c1.r, c2.r, m_colorChangeDt); // FIXME: change to Vector3.Lerp if need to change more than 1 component
+				mesh.material.color = curColor;
+			}
+		}
 	}
 	
 	void InitPlaces(){
@@ -113,12 +134,27 @@ public class Planet : MonoBehaviour {
 	
 	public void EnterScrollCollider(){
 		isAutoscroll = false;
-		mesh.material.color = Color.gray;
+		// Change color
+		if (m_colorChangeDt >= 0.7f) {
+			m_colorChangeDt = 0.0f;
+			m_colorChangingDir = 1;
+		} else {
+			Debug.Log("!! " + m_colorChangeDt);
+			mesh.material.color = highlightColor;
+		}
 		scrollDelta = 0;
 	}
 	public void ExitScrollCollider(){
-		print("scrollDelta: "+scrollDelta);
-		mesh.material.color = defColor;
+		Log.Galaxy("scrollDelta: " + scrollDelta);
+		// Change color
+		if (m_colorChangeDt >= 0.7f) {
+			m_colorChangeDt = 0.0f;
+			m_colorChangingDir = -1;
+		} else {
+			Debug.Log("!!!! " + m_colorChangeDt);
+			mesh.material.color = defColor;	
+		}
+
 		var orient = new Vector3(0,0,-12);
 		// находим ближайшее к камере занятое место
 		Place near = null;
