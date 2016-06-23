@@ -26,6 +26,7 @@ public class ChatScroller : MonoBehaviour {
 	void OnTriggerExit (Collider other) {
 		if (m_touchObject == other.gameObject) {
 			m_touching = false;
+			m_touchObject = null;
 		}
 	}
 }
