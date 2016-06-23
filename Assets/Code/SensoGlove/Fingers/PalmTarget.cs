@@ -16,6 +16,7 @@ public class PalmTarget : MonoBehaviour {
 	private HandNetworkData.DataType m_handType;
 	public HandNetworkData.DataType HandType { get { return m_handType; } }
 	private bool m_grasping = false;
+	public bool Grasping { get { return m_grasping; } }
 
 	public event EventHandler<PalmGraspedArgs> onPalmGraspStart = delegate {}; // Is fired when two fingers' colliders exit each other
 	public event EventHandler<PalmGraspedArgs> onPalmGraspEnd = delegate {}; // Is fired when two fingers' colliders exit each other
@@ -31,7 +32,7 @@ public class PalmTarget : MonoBehaviour {
 		foreach (var fing in fingers) {
 			float diffZ = Quaternion.Angle(transform.rotation, fing.transform.rotation);
 			if (diffZ > 180) diffZ = (360.0f - diffZ);
-			if (diffZ >= 80 && diffZ <= 150) ++grasp;
+			if (diffZ >= 90 && diffZ <= 150) ++grasp;
 		}
 		if (!m_grasping) {
 			if (grasp >= 2) {

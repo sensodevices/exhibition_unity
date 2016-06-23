@@ -31,12 +31,7 @@ public class Galaxy : MonoBehaviour {
 		touch = GetComponent<TouchListener>();
 		
 		planet.OnUsersCountChanged += OnUsersCountChanged;
-		
-		finger.OnSwipeChat += OnSwipeChat;
-		finger.OnSwipePlanet += OnSwipePlanet;
-		finger.OnExitCollision += OnExitCollision;
-		finger.OnEnterCollision += OnEnterCollision;
-		
+				
 		ChatSettings.Me.OnChanged += OnSettingsChanged;
 
 		MenuActions.Me.OnItemClick += OnMenuActionsItemClick;

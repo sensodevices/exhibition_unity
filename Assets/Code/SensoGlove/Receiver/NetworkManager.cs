@@ -118,7 +118,7 @@ public class NetworkManager : MonoBehaviour
       }
       if (!tcpState.is_sending && dt.TotalMilliseconds >= 100) {
         var rotationArray = new float[] { 
-          VRCamera.rotation.w, VRCamera.rotation.x, VRCamera.rotation.y, VRCamera.rotation.z,
+          VRCamera.localRotation.w, VRCamera.localRotation.x, VRCamera.localRotation.y, VRCamera.localRotation.z,
           VRCamera.localPosition.x, VRCamera.localPosition.z, VRCamera.localPosition.y 
         };
         int len = rotationArray.Length * 4;

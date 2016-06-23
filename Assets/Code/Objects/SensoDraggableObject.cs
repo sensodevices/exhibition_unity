@@ -40,20 +40,21 @@ public class SensoDraggableObject : MonoBehaviour
 
     void OnTriggerEnter(Collider other) 
     {
-        Debug.Log("trigger enter");
         if (m_palmAttached == null) {
             var palm = other.gameObject.GetComponent<PalmTarget>();
             if (palm != null) {
                 m_palmAttached = palm;
                 m_palmAttached.onPalmGraspStart += onPalmGrasped;
                 m_palmAttached.onPalmGraspEnd += onPalmGraspRelease;
+                if (m_palmAttached.Grasping) {
+                    do_attach();
+                }
             }
         }
     }
 
     void OnTriggerExit(Collider other) 
     {
-        Debug.Log("trigger exit");
         var palm = other.gameObject.GetComponent<PalmTarget>();
         if (palm != null && palm == m_palmAttached) {
             m_palmAttached.onPalmGraspStart -= onPalmGrasped;
@@ -73,7 +74,6 @@ public class SensoDraggableObject : MonoBehaviour
 
     private void do_attach()
     {
-        Debug.Log("do_attach");
         if (!m_touched) {
             m_rb.useGravity = true;
             m_touched = true;
@@ -87,7 +87,6 @@ public class SensoDraggableObject : MonoBehaviour
 
     private void do_detach()
     {
-        Debug.Log("do_detach");
         m_attached = false;
         transform.parent = m_parent;
         m_palmAttached.ToggleVibrateAll(false);
