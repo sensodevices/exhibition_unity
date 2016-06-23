@@ -8,7 +8,8 @@ public class User : MonoBehaviour {
 	public int id;
 	public float scaleFactor = 1f;
 	public Place place;
-	
+	public Vector3 Pos;
+
 	public Vector3 PrefferedScale{ get; private set; }
 
 	//List<View> views = new List<View>();
@@ -18,6 +19,10 @@ public class User : MonoBehaviour {
 	
 	void OnEnable(){
 		PrefferedScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+	}
+
+	void Update(){
+		Pos = transform.position - transform.parent.transform.position;
 	}
 	
 	public void SetId(int value){

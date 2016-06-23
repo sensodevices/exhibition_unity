@@ -13,9 +13,16 @@ public class Place {
 }
 
 
+/**/
+
+public interface IMenuRequester{
+	void RequestMenu();
+}
+
+
 /* Планета с персами */
 
-public class Planet : MonoBehaviour {
+public class Planet : MonoBehaviour, IMenuRequester {
 
 	public MeshRenderer mesh;
 	public Color highlightColor = new Color(1.0f, 0.3960f, 0.0666f, 1.0f);
@@ -24,9 +31,7 @@ public class Planet : MonoBehaviour {
 	public float persDistance = 5.2f;
 	public int persCount = 55;
 	public int myUserId;
-	
-	//public float persDistanceInner = 2.5f;
-	//public int persCountInner = 15;
+	public Transform marker;
 	
 	List<User> users = new List<User>();
 	public string Name {get;private set;}
@@ -36,13 +41,17 @@ public class Planet : MonoBehaviour {
 	List<Place> places = new List<Place>();
 	Color defColor;
 	Place selPlace;
+	Quaternion initialRotation;
 
 	private float m_colorChangeDt = 1.0f;
 	private int m_colorChangingDir = 0; // 1 = def to highlight, -1 = highlight to def
 	
+
+
 	void Start(){
 		InitPlaces();
 		defColor = mesh.material.color;
+		initialRotation = transform.rotation;
 	}
 
 	void Update() {
@@ -62,6 +71,13 @@ public class Planet : MonoBehaviour {
 		}
 	}
 	
+	public void RequestMenu(){
+		var u = GetSelected();
+		if (u == null) // чел улетел с переднего места
+			return;
+		MenuActions.Show(u.id, u.name);
+	}
+
 	void InitPlaces(){
 		InitPlacesInternal(persCount, persDistance);
 		//InitPlacesInternal(persCountInner, persDistanceInner);
@@ -108,12 +124,12 @@ public class Planet : MonoBehaviour {
 	
 	public void Scroll(float dx, float dy){
 		scrollDelta += dx;
-		if (!hasMinScroll())
+		if (!HasMinScroll())
 			return;
 		transform.Rotate(Vector3.up, -rotateSpeed*dx);
 	}
 	
-	bool hasMinScroll(){
+	bool HasMinScroll(){
 		return Mathf.Abs(scrollDelta) >= minimalScrollDelta;
 	}
 	
@@ -124,12 +140,9 @@ public class Planet : MonoBehaviour {
 		
 	}
 	public void ExitPersCollider(){
-		if (hasMinScroll()) // при прокрутке не вызываем меню на персе
+		if (HasMinScroll()) // при прокрутке не вызываем меню на персе
 			return;
-		var u = GetSelected();
-		if (u == null) // чел улетел с переднего места
-			return;
-		MenuActions.Show(u.id, u.name);
+		// меню было тут
 	}
 	
 	public void EnterScrollCollider(){
@@ -139,45 +152,48 @@ public class Planet : MonoBehaviour {
 			m_colorChangeDt = 0.0f;
 			m_colorChangingDir = 1;
 		} else {
-			Debug.Log("!! " + m_colorChangeDt);
 			mesh.material.color = highlightColor;
 		}
 		scrollDelta = 0;
 	}
 	public void ExitScrollCollider(){
-		Log.Galaxy("scrollDelta: " + scrollDelta);
 		// Change color
 		if (m_colorChangeDt >= 0.7f) {
 			m_colorChangeDt = 0.0f;
 			m_colorChangingDir = -1;
 		} else {
-			Debug.Log("!!!! " + m_colorChangeDt);
 			mesh.material.color = defColor;	
 		}
+		RotateToNearUser();
+	}
+	
+	void RotateToNearUser(){
+		var orient = new Vector3(0,0,1);
+		marker.position = transform.position + orient;
 
-		var orient = new Vector3(0,0,-12);
 		// находим ближайшее к камере занятое место
 		Place near = null;
 		float min = float.MaxValue;
 		foreach (var item in places){
 			if (item.user == null)
 				continue;
-			var d = Vector3.Distance(orient, item.user.transform.position);
+			var pos = item.user.transform.position - transform.position;
+			var d = Vector3.Distance(orient, pos);
 			if (d < min){
 				min = d;
 				near = item;
 			}
 		}
-		var p = near.user.transform.position;
+		var p = near.user.transform.position - transform.position;
 		float a = Vector3.Angle(orient, p);
-		if (p.x < orient.x)
+		if (p.x > orient.x)
 			a = -a;
 		autoScrollAngle = a;
 		isAutoscroll = true;
 		StartCoroutine(AutoScrollInternal());
 		selPlace = near;
 	}
-	
+
 	IEnumerator AutoScrollInternal(){
 		var step = autoScrollAngle/10f;
 		for (int k = 0; k < 10; ++k){
@@ -258,7 +274,7 @@ public class Planet : MonoBehaviour {
 			OnUsersCountChanged(users.Count);
 	}
 	
-	public void Clear(){
+	public void Reset(){
 		foreach (var u in users){
 			var p = u.place;
 			p.user = null; // "освободили" место
@@ -266,6 +282,8 @@ public class Planet : MonoBehaviour {
 			Destroy(u.gameObject);
 		}
 		users.Clear();
+		selPlace = null;
+		transform.rotation = initialRotation;
 	}
 	
 	public void SetName(string value){

@@ -358,7 +358,7 @@ public class Galaxy : MonoBehaviour {
 			
 			case "353": // список юзеров. может быть несколько таких команд
 				if (isWait353){
-					planet.Clear();
+					planet.Reset();
 					isWait353 = false;
 				}
 				planet.JoinUsers(c.Postfix);

@@ -16,6 +16,7 @@ public class CentralButton : MonoBehaviour {
 	private bool m_pressed = false;
 
 	public PlanetCollider m_planetCollider; // Planet Collider component to synchronize with
+	public Planet menuRequester;
 
 	public bool IsActive {
 		get { return m_touching; }
@@ -33,8 +34,8 @@ public class CentralButton : MonoBehaviour {
 				if (currentPos.y < (m_startPosition.y - maxButtonMotion)) currentPos.y = (m_startPosition.y - maxButtonMotion);
 				transform.position = currentPos;
 				if (!m_pressed && (m_startPosition.y - transform.position.y) >= pressedLevel) {
-					Debug.Log("pressed");
 					m_pressed = true;
+					menuRequester.RequestMenu();
 				}
 			}
 		} else {
