@@ -19,7 +19,8 @@ public class MenuActions : MonoBehaviour {
 	
 	public Text textTitle;
 	public Transform itemsArea;
-	
+	public ScrollRect scrollRect;
+
 	public delegate void ClickItemFunc(MenuItem item);
 	public ClickItemFunc OnItemClick;
 	
@@ -33,6 +34,16 @@ public class MenuActions : MonoBehaviour {
 		DismissLocal();// прячем
 	}
 	
+	void Update(){
+		var dir = 0f; 
+		if (Input.GetKey(KeyCode.UpArrow)){
+			dir = 0.1f;
+		} else if (Input.GetKey(KeyCode.DownArrow)){
+			dir = -0.1f;
+		}
+		scrollRect.verticalNormalizedPosition += dir*Time.deltaTime;
+	}
+
 	public static void AddItem (string text, string action) {
 		var i = new MenuItem{
 			Text = text, 

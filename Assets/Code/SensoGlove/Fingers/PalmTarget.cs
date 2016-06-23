@@ -20,6 +20,11 @@ public class PalmTarget : MonoBehaviour {
 	public event EventHandler<PalmGraspedArgs> onPalmGraspStart = delegate {}; // Is fired when two fingers' colliders exit each other
 	public event EventHandler<PalmGraspedArgs> onPalmGraspEnd = delegate {}; // Is fired when two fingers' colliders exit each other
 
+
+	public void Start()
+	{
+		BroadcastMessage("SetPalm", this);
+	}
 	public void FixedUpdate()
 	{
 		int grasp = 0;

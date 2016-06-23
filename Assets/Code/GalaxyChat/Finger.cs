@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 
 public enum ColType{
@@ -26,6 +27,29 @@ public class Finger : MonoBehaviour {
 	}
 	
 	void Update () {
+		
+		var space = Input.GetKeyDown(KeyCode.Space);
+		{
+			//print("try hit");
+			var point = Camera.main.WorldToScreenPoint(transform.position);
+			var ray = Camera.main.ScreenPointToRay(point);
+			var hits = Physics.RaycastAll(ray);
+			if (hits.Length > 0){
+				foreach (var hit in hits){
+					var go = hit.collider.gameObject;
+					if (go.tag == "MenuItem"){
+						var btn = go.GetComponent<Button>();
+						var c = btn.colors;
+						c.normalColor = Color.green;
+						btn.colors = c;
+						if (space)
+							btn.onClick.Invoke();
+						break;
+					}
+					//print("hit: "+hit.collider.name);
+				}
+			}
+		}
 		
 		if (Input.GetMouseButtonDown(0)){
 		//	print("mouse: "+Input.mousePosition);

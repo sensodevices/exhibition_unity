@@ -8,6 +8,7 @@ TagManager:
   - PlanetCollider
   - PersCollider
   - SensoManager
+  - MenuItem
   layers:
   - Default
   - TransparentFX

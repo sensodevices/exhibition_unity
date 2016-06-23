@@ -47,9 +47,6 @@ public class PotObject : MonoBehaviour {
     meshCollider = GetComponent<MeshCollider>();
     recreateMesh();
 
-    var sensoMan = GameObject.FindWithTag("SensoManager");
-    if (sensoMan != null) SetSensoManager(sensoMan);
-
     pullingFingers = new List<GameObject>();
   }
 
@@ -365,12 +362,20 @@ public class PotObject : MonoBehaviour {
     }
 
     // Senso!
-    public void SetSensoManager(GameObject sensoMan)
+    public void SubscribeEvents(GameObject sensoMan)
     {
       var eventEmitter = sensoMan.GetComponent<SensoEventEmitter>();
       if (eventEmitter != null) {
         eventEmitter.onFingersCollided += onFingersCollided;
         eventEmitter.onFingersReleased += onFingersReleased;
+      }
+    }
+    public void UnsubscribeEvents(GameObject sensoMan)
+    {
+      var eventEmitter = sensoMan.GetComponent<SensoEventEmitter>();
+      if (eventEmitter != null) {
+        eventEmitter.onFingersCollided -= onFingersCollided;
+        eventEmitter.onFingersReleased -= onFingersReleased;
       }
     }
 
@@ -397,7 +402,10 @@ public class PotObject : MonoBehaviour {
         if (args.Fingers[0].fingerId == HandNetworkData.FingerType.Thumb && args.Fingers[1].fingerId == HandNetworkData.FingerType.Index) {
           var indexFinger = args.Fingers[1].GetGObject();
           if (pullingFingers.Remove(indexFinger)) {
-            if (pullingFingers.Count == 0) m_isPulling = false;
+            if (pullingFingers.Count == 0) {
+              m_isPulling = false;
+              StopPull();
+            }
           }
           var _target = indexFinger.GetComponent<FingerTarget>();
           if (_target != null)

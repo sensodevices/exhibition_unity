@@ -8,6 +8,7 @@ public class FingerTarget : MonoBehaviour
 	public HandNetworkData.DataType HandType { get { return m_handType; } }
 	private SensoEventEmitter m_emitter;
 	private NetworkManager m_netMan;
+	WeakReference m_palm;
 
 	private bool isVibrating { get { return m_isVibrating; } }
 	private bool m_isVibrating = false;
@@ -38,6 +39,11 @@ public class FingerTarget : MonoBehaviour
 	public void SetHandType(HandNetworkData.DataType handType)
 	{
 		m_handType = handType;
+	}
+
+	public void SetPalm(PalmTarget palm) 
+	{
+		m_palm = new WeakReference(palm);
 	}
 
 	void OnTriggerEnter(Collider other) {
@@ -71,5 +77,17 @@ public class FingerTarget : MonoBehaviour
 	public void StopVibrate()
 	{
 		m_isVibrating = false;
+	}
+
+	/// <summary>Returns an angle of the finger relative to the palm</summary>
+	public float GetRelativeAngle() 
+	{
+		if (m_palm.IsAlive) {
+			PalmTarget p = m_palm.Target as PalmTarget;
+			float diffZ = Quaternion.Angle(p.transform.rotation, transform.rotation);
+			if (diffZ > 180) diffZ = (360.0f - diffZ);
+			return diffZ;
+		}  
+		return 0.0f;
 	}
 }
