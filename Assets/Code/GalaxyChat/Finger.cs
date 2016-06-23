@@ -28,7 +28,7 @@ public class Finger : MonoBehaviour {
 	void Update () {
 		
 		if (Input.GetMouseButtonDown(0)){
-			print("mouse: "+Input.mousePosition);
+		//	print("mouse: "+Input.mousePosition);
 		}
 		
 		var xl = Input.GetKey(KeyCode.LeftArrow);
