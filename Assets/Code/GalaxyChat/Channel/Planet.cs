@@ -31,7 +31,6 @@ public class Planet : MonoBehaviour, IMenuRequester {
 	public float persDistance = 5.2f;
 	public int persCount = 55;
 	public int myUserId;
-	public Transform marker;
 	
 	List<User> users = new List<User>();
 	public string Name {get;private set;}
@@ -169,7 +168,6 @@ public class Planet : MonoBehaviour, IMenuRequester {
 	
 	void RotateToNearUser(){
 		var orient = new Vector3(0,0,1);
-		marker.position = transform.position + orient;
 
 		// находим ближайшее к камере занятое место
 		Place near = null;

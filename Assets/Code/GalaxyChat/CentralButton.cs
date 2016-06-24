@@ -36,6 +36,7 @@ public class CentralButton : MonoBehaviour {
 				if (!m_pressed && (m_startPosition.y - transform.position.y) >= pressedLevel) {
 					m_pressed = true;
 					menuRequester.RequestMenu();
+					GlobalFuncs.ToggleCross(true);
 				}
 			}
 		} else {
@@ -46,7 +47,6 @@ public class CentralButton : MonoBehaviour {
 				currentPos.y = Mathf.Lerp(m_touchReleasePosition.y, m_startPosition.y, returningTime);
 				transform.position = currentPos;
 				if (m_pressed && (m_startPosition.y - transform.position.y) < pressedLevel) {
-					Debug.Log("unpressed");
 					m_pressed = false;
 				}
 			}
