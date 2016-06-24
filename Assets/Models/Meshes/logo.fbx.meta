@@ -1,7 +1,7 @@
 fileFormatVersion: 2
-guid: 4f8b10adf3507e64c86a13459fe4f112
-timeCreated: 1466492105
-licenseType: Free
+guid: 726911b72b94e86479009cc6a85f5971
+timeCreated: 1466742624
+licenseType: Pro
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
@@ -9,7 +9,7 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: panel_galaxy_screen_2
+    4300000: panel_galaxy_screen_logo_2
     9500000: //RootNode
   materials:
     importMaterials: 1

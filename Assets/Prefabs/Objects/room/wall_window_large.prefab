@@ -15,7 +15,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 1
   m_IsActive: 1
 --- !u!1 &139412
 GameObject:
@@ -27,12 +27,13 @@ GameObject:
   - 4: {fileID: 442338}
   - 33: {fileID: 3395132}
   - 23: {fileID: 2355004}
+  - 65: {fileID: 6546726}
   m_Layer: 0
   m_Name: wall_window_large
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 1
   m_IsActive: 1
 --- !u!4 &412468
 Transform:
@@ -52,8 +53,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 139412}
-  m_LocalRotation: {x: 0, y: -0.34202018, z: 0, w: 0.9396926}
-  m_LocalPosition: {x: -8.66, y: 0.5, z: 5}
+  m_LocalRotation: {x: 0, y: -0.8660255, z: 0, w: 0.49999988}
+  m_LocalPosition: {x: -6.43, y: 0.5, z: -7.66}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 412468}
@@ -125,6 +126,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 139412}
   m_Mesh: {fileID: 4300000, guid: 4d4da365a0451b0438c0ad646e13bcb3, type: 3}
+--- !u!65 &6546726
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 139412}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 6.840404, y: 7.698954, z: 0.8660008}
+  m_Center: {x: 3.420202, y: 3.849477, z: -0.4330004}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
