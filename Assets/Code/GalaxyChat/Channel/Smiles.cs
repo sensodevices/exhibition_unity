@@ -3,6 +3,7 @@
 public sealed class Smiles : MonoBehaviour {
 
 	public static string Replace(string source) {
+		return source;
 		var result = source;
 		for (int k = 0; k < Array.Length; k += 2){
 			var s1 = Array[k];

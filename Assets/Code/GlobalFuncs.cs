@@ -16,7 +16,8 @@ public class GlobalFuncs : MonoBehaviour {
 	}
 	
 	public static void ToggleCross(bool toggle) {
-		Me.Cross.active = true;
+        if (Me != null) 
+            Me.Cross.active = toggle;
 	}
 
     public static FingerTarget GetFinger(HandNetworkData.DataType handType, HandNetworkData.FingerType finger) {

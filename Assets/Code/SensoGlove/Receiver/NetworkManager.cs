@@ -23,7 +23,7 @@ public class NetworkManager : MonoBehaviour
   }
 
   private string sensoHost {
-    get { return "192.168.15.195"; }
+    get { return "192.168.15.79"; }
   }
   private int sensoPort {
     get { return 13456; }
@@ -57,6 +57,7 @@ public class NetworkManager : MonoBehaviour
 
   private void do_connect()
   {
+    Debug.Log("do_connect");
     tcpState.lastConnectRetry = DateTime.Now;
     IPAddress anIP;
 
@@ -150,6 +151,7 @@ public class NetworkManager : MonoBehaviour
       var aState = (TcpState)ar.AsyncState;
       aState.waitConnect = false;
       var tcpClient = (TcpClient)aState.sock;
+      Debug.Log("connect callback: " + tcpClient.Connected);
       if (tcpClient.Connected) {
         tcpState.stream = tcpClient.GetStream();
         tcpState.ready = true;

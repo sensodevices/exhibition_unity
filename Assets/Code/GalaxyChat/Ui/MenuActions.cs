@@ -73,6 +73,7 @@ public class MenuActions : MonoBehaviour {
 	
 	public void DismissLocal () {
 		gameObject.SetActive(false);
+		GlobalFuncs.ToggleCross(false);
 	}
 	
 	public static void Clear () {

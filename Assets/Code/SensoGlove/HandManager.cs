@@ -33,7 +33,6 @@ public class HandManager : MonoBehaviour {
 	{
 		// Hand position
 		HandNetworkData.SingleHandData aData = netMan.GetHandData(handType);
-
 		if (aData != null)
 		{
 			Vector3 palmPosition = aData.palmPosition;

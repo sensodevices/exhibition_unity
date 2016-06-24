@@ -45,7 +45,10 @@ public class HandNetworkData {
 		x = BitConverter.ToSingle(data, start) * Mathf.Rad2Deg; start += 4;
 		y = BitConverter.ToSingle(data, start) * Mathf.Rad2Deg; start += 4;
 		z = BitConverter.ToSingle(data, start) * Mathf.Rad2Deg; start += 4;
-		if (Single.IsNaN(x) || Single.IsNaN(y) || Single.IsNaN(z)) return;
+		if (Single.IsNaN(x) || Single.IsNaN(y) || Single.IsNaN(z)) {
+			Debug.Log("position is nan");
+			return;
+		}
 		setData.palmPosition = new Vector3(x, y, z);
 
 		x = BitConverter.ToSingle(data, start); start += 4;
@@ -54,20 +57,29 @@ public class HandNetworkData {
 		y *= Mathf.Rad2Deg; if (z < 0.0f) z += 360.0f;
 		z = BitConverter.ToSingle(data, start); start += 4;
 		z *= Mathf.Rad2Deg; if (y < 0.0f) y += 360.0f;
-		if (Single.IsNaN(x) || Single.IsNaN(y) || Single.IsNaN(z)) return;
+		if (Single.IsNaN(x) || Single.IsNaN(y) || Single.IsNaN(z)) {
+			Debug.Log("rotation is nan");
+			return;
+		}
 		setData.palmRotation = new Vector3(x, y, z);
-
+		
 		x = BitConverter.ToSingle(data, start); start += 4;
 		z = BitConverter.ToSingle(data, start); start += 4;
 		y = BitConverter.ToSingle(data, start); start += 4;
-		if (Single.IsNaN(x) || Single.IsNaN(y) || Single.IsNaN(z)) return;
+		if (Single.IsNaN(x) || Single.IsNaN(y) || Single.IsNaN(z)) {
+			Debug.Log("wrist is nan");
+			return;
+		}
 		setData.wristRotation = new Vector3(x, y, z);
 
 		for (int i = 0; i < 5; ++i) {
 			x = BitConverter.ToSingle(data, start); start += 4;
 			z = BitConverter.ToSingle(data, start); start += 4;
 			y = BitConverter.ToSingle(data, start); start += 4;
-			if (Single.IsNaN(x) || Single.IsNaN(y) || Single.IsNaN(z)) return;
+			if (Single.IsNaN(x) || Single.IsNaN(y) || Single.IsNaN(z)) {
+				Debug.Log("finger " + i + " is nan");
+				return;
+			}
 			setData.fingerPositions[i] = new Vector3(x, y, z);
 		}
 

@@ -68,6 +68,7 @@ public class FingerTarget : MonoBehaviour
 	}
 
 	void OnTriggerEnter(Collider other) {
+		StartVibrate(2);
 		if (m_emitter != null) {
 			var otherFingerTarget = other.gameObject.GetComponent<FingerTarget>();
 			if (otherFingerTarget != null) {
@@ -77,6 +78,7 @@ public class FingerTarget : MonoBehaviour
 	}
 
 	void OnTriggerExit(Collider other) {
+		StopVibrate();
 		if (m_emitter != null) {
 			var otherFingerTarget = other.gameObject.GetComponent<FingerTarget>();
 			if (other.gameObject.GetComponent<FingerTarget>() != null) {
