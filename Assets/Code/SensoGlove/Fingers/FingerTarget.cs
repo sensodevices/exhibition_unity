@@ -1,6 +1,10 @@
 using UnityEngine;
 using System;
 
+public class FingerMovedArgs : EventArgs {
+	
+}
+
 public class FingerTarget : MonoBehaviour
 {
 	public HandNetworkData.FingerType fingerId;
@@ -15,6 +19,9 @@ public class FingerTarget : MonoBehaviour
 	private byte m_vibrateStrength = 2;
 
 	private DateTime lastSent;
+	
+
+	public event EventHandler<FingerMovedArgs> onMove = delegate {}; // Is fired when finger has moved
 
 	public void RegisterEventEmitter(SensoEventEmitter evEmitter)
 	{
@@ -90,4 +97,6 @@ public class FingerTarget : MonoBehaviour
 		}  
 		return 0.0f;
 	}
+
+	
 }

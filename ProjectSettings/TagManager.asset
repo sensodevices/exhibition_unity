@@ -9,6 +9,13 @@ TagManager:
   - PersCollider
   - SensoManager
   - MenuItem
+  - RightHand
+  - Palm
+  - IndexFinger
+  - MiddleFinger
+  - RingFinger
+  - PinkyFinger
+  - ThumbFinger
   layers:
   - Default
   - TransparentFX

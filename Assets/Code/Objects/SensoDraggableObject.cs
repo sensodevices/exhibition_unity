@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 public class SensoDraggableObject : MonoBehaviour
 {
-    private List<FingerTarget> fingersAttached;
     private PalmTarget m_palmAttached = null;
     private bool m_attached = false;
 
@@ -16,7 +15,6 @@ public class SensoDraggableObject : MonoBehaviour
 
     void Start()
     {
-        fingersAttached = new List<FingerTarget>();
         m_parent = transform.parent;
         m_rb = GetComponent<Rigidbody>();
         instantSpeeds = new Queue<Vector3>();
@@ -98,9 +96,7 @@ public class SensoDraggableObject : MonoBehaviour
             ++counter;
         }
         instantSpeed /= counter;
-        m_rb.velocity = instantSpeed * 2.0f;
-
-        // m_rb.AddForce(instantSpeed * 2.0f, ForceMode.Impulse);
+        m_rb.velocity = instantSpeed * 1.5f;
     }
 
 }

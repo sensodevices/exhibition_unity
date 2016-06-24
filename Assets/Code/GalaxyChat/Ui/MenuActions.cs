@@ -54,6 +54,11 @@ public class MenuActions : MonoBehaviour {
 	
 	public static void Show (int associatedUserId, string userName) {
 		Me.ShowLocal(associatedUserId, userName);
+
+		var indexFinger = GlobalFuncs.GetFinger(HandNetworkData.DataType.RightHand, HandNetworkData.FingerType.Index);
+		if (indexFinger != null) {
+			Debug.Log("index finger found");
+		}
 	}
 	
 	public void ShowLocal (int associatedUserId, string userName) {
