@@ -22,12 +22,30 @@ public class Generator : MonoBehaviour {
 		}
 	}
 	
+
+	private bool needReset = false;
+	void Update ()
+	{
+		if (Input.GetKey("r")) {
+			needReset = true;
+		}
+	}
+
+
+
+
+
+
+
+
+
 	// Update is called once per frame
 	void FixedUpdate () {
-		if (spawnedObject == null) {
+		if (spawnedObject == null || needReset) {
 			var newInd = numberGenerator.Next(spawnableObjects.Length);
 			spawnedObject = (GameObject)Instantiate(spawnableObjects[newInd], spawnPosition, spawnRotation);
 			spawnedObject.transform.parent = transform;
+			needReset = false;
 		}
 	}
 

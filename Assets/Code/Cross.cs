@@ -10,8 +10,6 @@ class Cross : MonoBehaviour {
 
     void Update() 
     {
-        var space = Input.GetKeyDown(KeyCode.Space);
-
         // FIXME: make this more universal, not only MenuItem
         var point = Camera.main.WorldToScreenPoint(transform.position);
         var ray = Camera.main.ScreenPointToRay(point);

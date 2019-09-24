@@ -27,7 +27,9 @@ public class PotObject : MonoBehaviour {
   private Vector3[] currentVertices;
 
   private bool m_isPulling = false; // Should layers be pulling out?
-  private List<GameObject> pullingFingers;
+  private List<SensoFingerTip> pullingFingers;
+
+  private float idleTimer;
 
   // Use this for initialization
   void Start ()
@@ -47,7 +49,7 @@ public class PotObject : MonoBehaviour {
     meshCollider = GetComponent<MeshCollider>();
     recreateMesh();
 
-    pullingFingers = new List<GameObject>();
+    pullingFingers = new List<SensoFingerTip>();
   }
 
   // Update is called once per frame
@@ -60,15 +62,16 @@ public class PotObject : MonoBehaviour {
         PullLayer(obj.transform.position, 0.1f);
       }
     }
-    /*if (Input.GetKey("r")) {
+    if (Input.GetKey("r")) {
       for (i = 0; i < layersCount; ++i)
       {
         radiuses[i] = startRadius;
+        curRadiuses[i] = startRadius;
       }
       recreateMesh();
       needMeshUpdate = false;
     }
-    else */ if (needTransform)
+    else if (needTransform)
     {
       bool hasDiff = false;
       for (i = 0; i < layersCount; ++i) {
@@ -96,14 +99,14 @@ public class PotObject : MonoBehaviour {
   void OnTriggerStay(Collider other)
   {
     if (m_isPulling) return;
-    var finger = other.gameObject.GetComponent<FingerTarget>();
+    var finger = other.gameObject.GetComponent<SensoFingerTip>();
     if (finger == null) return; // do not react on non-finger collider
-    finger.StartVibrate();
+    finger.Vibrate();
 
     int layer = (int)Math.Floor((other.transform.position.y - transform.position.y) / layerHeight) + 1;
     if (layer >= layersCount) { layer = (int)(layersCount); }
 
-    float impactDepth ;
+    float impactDepth;
     float y;
     var mBounds = other.bounds;
     int impactLayers = (int)(Math.Ceiling(mBounds.extents.y / layerHeight) / 2.0);
@@ -142,7 +145,7 @@ public class PotObject : MonoBehaviour {
 
   void OnTriggerExit(Collider other)
   {
-    var finger = other.gameObject.GetComponent<FingerTarget>();
+    var finger = other.gameObject.GetComponent<SensoFingerTip>();
     if (finger == null) return; // do not react on non-finger collider
     finger.StopVibrate();
     StopPull(); // stops radius changes
@@ -216,8 +219,8 @@ public class PotObject : MonoBehaviour {
   }
 
   /**
-  *
-  */
+   *
+   */
   private void recreateMesh()
   {
     uint layer, offset = 0, triOffset = 0, layerVertices;
@@ -270,9 +273,9 @@ public class PotObject : MonoBehaviour {
   }
 
   /**
-  * @fn createLayer
-  * Creates vertices for the layer
-  */
+   * @fn createLayer
+   * Creates vertices for the layer
+   */
   private uint createLayer(ref Vector3[] vertices, ref Vector3[] normals, ref Vector2[] uv, uint offset, float y, float radius, float normalVectorZ, float V, Nullable<Vector3> normalOverride = null)
   {
     float _angle, _x, _z;
@@ -316,9 +319,9 @@ public class PotObject : MonoBehaviour {
   }
 
   /**
-  * @fn createBottomTriangles
-  * Creates triangles for bottom of the pot
-  */
+   * @fn createBottomTriangles
+   * Creates triangles for bottom of the pot
+   */
   private uint createBottomTriangles(ref int[] triangles, uint triOffset, uint firstVertexOfLayer, uint centerVertex, bool clockwiseDirection = false)
   {
     uint offset = triOffset;
@@ -362,55 +365,38 @@ public class PotObject : MonoBehaviour {
     }
 
     // Senso!
-    public void SubscribeEvents(GameObject sensoMan)
+    public void SubscribeEvents(SensoHand hand)
     {
-      var eventEmitter = sensoMan.GetComponent<SensoEventEmitter>();
-      if (eventEmitter != null) {
-        eventEmitter.onFingersCollided += onFingersCollided;
-        eventEmitter.onFingersReleased += onFingersReleased;
-      }
+      hand.OnPinchStart += onPitchStart;
+      hand.OnPinchEnd += onPitchEnd;
     }
-    public void UnsubscribeEvents(GameObject sensoMan)
+    public void UnsubscribeEvents(SensoHand hand)
     {
-      var eventEmitter = sensoMan.GetComponent<SensoEventEmitter>();
-      if (eventEmitter != null) {
-        eventEmitter.onFingersCollided -= onFingersCollided;
-        eventEmitter.onFingersReleased -= onFingersReleased;
+      hand.OnPinchStart -= onPitchStart;
+      hand.OnPinchEnd -= onPitchEnd;
+    }
+
+    public void onPitchStart(object sender, SensoPinchEventArgs args)
+    {
+      if (args.Fingers[0].FingerType == ESensoFingerType.Thumb && args.Fingers[1].FingerType == ESensoFingerType.Index) {
+        var indexFinger = args.Fingers[1];
+        if (pullingFingers.Contains(indexFinger)) return;
+        m_isPulling = true;
+        pullingFingers.Add(indexFinger);
+        indexFinger.Vibrate();
       }
     }
 
-    public void onFingersCollided(object sender, FingersCollidedEventArgs args)
+    public void onPitchEnd(object sender, SensoPinchEventArgs args)
     {
-      if (args.Fingers[0].HandType == args.Fingers[1].HandType) {
-        if (args.Fingers[0].fingerId == HandNetworkData.FingerType.Thumb && args.Fingers[1].fingerId == HandNetworkData.FingerType.Index) {
-          var indexFinger = args.Fingers[1].GetGObject();
-          foreach (var obj in pullingFingers) {
-            if (obj == indexFinger) return;
+      if (args.Fingers[0].FingerType == ESensoFingerType.Thumb && args.Fingers[1].FingerType == ESensoFingerType.Index) {
+        var indexFinger = args.Fingers[1];
+        if (pullingFingers.Remove(indexFinger))
+          if (pullingFingers.Count == 0) {
+            m_isPulling = false;
+            StopPull();
           }
-          m_isPulling = true;
-          pullingFingers.Add(indexFinger);
-          var _target = indexFinger.GetComponent<FingerTarget>();
-          if (_target != null)
-            _target.StartVibrate();
-        }
-      }
-    }
-
-    public void onFingersReleased(object sender, FingersCollidedEventArgs args)
-    {
-      if (args.Fingers[0].HandType == args.Fingers[1].HandType) {
-        if (args.Fingers[0].fingerId == HandNetworkData.FingerType.Thumb && args.Fingers[1].fingerId == HandNetworkData.FingerType.Index) {
-          var indexFinger = args.Fingers[1].GetGObject();
-          if (pullingFingers.Remove(indexFinger)) {
-            if (pullingFingers.Count == 0) {
-              m_isPulling = false;
-              StopPull();
-            }
-          }
-          var _target = indexFinger.GetComponent<FingerTarget>();
-          if (_target != null)
-            _target.StopVibrate();
-        }
+        indexFinger.StopVibrate();
       }
     }
   }

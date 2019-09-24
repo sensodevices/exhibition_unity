@@ -5,10 +5,6 @@ public class GlobalFuncs : MonoBehaviour {
 	
 	public GameObject Cross;
 
-    static private string[] fingerTags = {
-        "ThumbFinger", "IndexFinger", "MiddleFinger", "RingFinger", "PinkyFinger"     
-    };
-
 	public static GlobalFuncs Me {get; private set;}
 	
 	void Awake () {
@@ -17,20 +13,8 @@ public class GlobalFuncs : MonoBehaviour {
 	
 	public static void ToggleCross(bool toggle) {
         if (Me != null) 
-            Me.Cross.active = toggle;
+            Me.Cross.SetActive(toggle);
 	}
-
-    public static FingerTarget GetFinger(HandNetworkData.DataType handType, HandNetworkData.FingerType finger) {
-        var fingers = GameObject.FindGameObjectsWithTag(fingerTags[(int)finger]);
-        foreach (var f in fingers)
-        {
-            var trg = f.GetComponent<FingerTarget>();
-            if (trg != null && trg.HandType == handType) {
-                return trg;
-            }
-        }
-        return null;
-    }
 	
 	
 }

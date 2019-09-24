@@ -16,6 +16,7 @@ TagManager:
   - RingFinger
   - PinkyFinger
   - ThumbFinger
+  - LeftHand
   layers:
   - Default
   - TransparentFX
@@ -27,9 +28,9 @@ TagManager:
   - 
   - UserHand
   - Interactable
-  - 
-  - 
-  - 
+  - Interactable_novibrate
+  - LeftEye
+  - RightEye
   - 
   - 
   - 

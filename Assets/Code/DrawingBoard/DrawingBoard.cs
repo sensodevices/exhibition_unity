@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 
 public class DrawingBoard : MonoBehaviour {
 
@@ -42,18 +43,26 @@ public class DrawingBoard : MonoBehaviour {
 	}
 
 	void OnTriggerStay (Collider other) {
-		var obj = other.gameObject;
-		var finger = obj.GetComponent<FingerTarget>();
-		if (finger != null && finger.fingerId != HandNetworkData.FingerType.Thumb) {
-			float diffZ = finger.GetRelativeAngle();
-			if (diffZ < 50) {
-				var closestPoint = GetComponent<Renderer>().bounds.ClosestPoint(other.gameObject.transform.position);
+		var finger = other.GetComponent<SensoFingerTip>();
+		if (finger != null && finger.FingerType != ESensoFingerType.Thumb) {
+			float pitch = finger.RelativePitch;
+			if (pitch < 50) {
+				finger.Vibrate(2);
+				var closestPoint = GetComponent<Renderer>().bounds.ClosestPoint(other.transform.position);
 				float X = ((closestPoint.z - m_left) / m_size.z);
 				float Y = ((closestPoint.y - m_bottom) / m_size.y);
-				// transform.position.y - transform.localScale
-				DrawOnTexture(VtoX(X), UtoY(Y), drawColors[(int)finger.fingerId - 1], drawRadiuses[(int)finger.fingerId - 1]);
+				DrawOnTexture(VtoX(X), UtoY(Y), drawColors[(int)finger.FingerType - 1], drawRadiuses[(int)finger.FingerType - 1]);
 				m_needUpdateTexture = true;
+			} else {
+				finger.StopVibrate();
 			}
+		}
+	}
+
+	void OnTriggerExit (Collider other) {
+		var finger = other.GetComponent<SensoFingerTip>();
+		if (finger != null) {
+			finger.StopVibrate();
 		}
 	}
 
@@ -78,8 +87,10 @@ public class DrawingBoard : MonoBehaviour {
 		float dRadius = radius * radius;
 		for (int y1 = -radius; y1 < radius; ++y1) {
 			for (int x1 = -radius; x1 < radius; ++x1) {
-				if (x1 * x1 + y1 * y1 <= dRadius) {
-					m_colors[(y + y1) * textureSize + (x + x1)] = col;
+				if (x + x1 > 0 && x + x1 < textureSize - 1 && y + y1 > 0 && y + y1 < textureSize - 1) { 
+					if (x1 * x1 + y1 * y1 <= dRadius) {
+						m_colors[(y + y1) * textureSize + (x + x1)] = col;
+					}
 				}
 			}
 		}

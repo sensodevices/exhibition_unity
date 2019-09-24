@@ -2,20 +2,27 @@ using UnityEngine;
 
 public class CameraRotation : MonoBehaviour {
 
-    private GameObject m_sensoManager;
+    public Transform sensoManager;
 
     private Vector3 prevRotation;
     public void Start()
     {
         prevRotation = transform.localEulerAngles;
-        m_sensoManager = (GameObject)GameObject.FindGameObjectWithTag("SensoManager");
     }
 
     public void FixedUpdate() 
     {
-        float dy = prevRotation.y - transform.localEulerAngles.y;
+        if (Input.GetKey ("a"))
+        {
+            transform.Rotate(new Vector3(0, -1.0f, 0), Space.World);
+        }
+        if (Input.GetKey ("d"))
+        {
+            transform.Rotate(new Vector3(0, 1.0f, 0), Space.World);
+        }
+        // float dy = prevRotation.y - transform.localEulerAngles.y;
         prevRotation = transform.localEulerAngles;
-        m_sensoManager.transform.RotateAround(transform.parent.position, Vector3.down, dy);
+        // sensoManager.transform.RotateAround(transform.parent.position, Vector3.down, dy);
     }
 
 }
